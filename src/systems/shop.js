@@ -219,10 +219,55 @@ class ShopSystem {
         this.customerTimer = 0;
     }
 
+    // Shop upgrades
+    getUpgrades() {
+        return [
+            {
+                id: 'display_slots', name: 'Expand Display',
+                description: `Add 4 more display slots (current: ${this.maxDisplay})`,
+                cost: 200 * this.shopLevel, maxLevel: 5,
+                currentLevel: Math.floor((this.maxDisplay - 8) / 4),
+                apply: () => { this.maxDisplay += 4; }
+            },
+            {
+                id: 'customer_slots', name: 'Bigger Shop',
+                description: `Allow ${this.maxCustomers + 1} customers at once`,
+                cost: 300 * this.shopLevel, maxLevel: 4,
+                currentLevel: this.maxCustomers - 3,
+                apply: () => { this.maxCustomers++; }
+            },
+            {
+                id: 'faster_customers', name: 'Better Location',
+                description: 'Customers arrive 15% faster',
+                cost: 250 * this.shopLevel, maxLevel: 5,
+                currentLevel: Math.round((8000 - this.customerInterval) / 1200),
+                apply: () => { this.customerInterval = Math.max(3000, this.customerInterval - 1200); }
+            },
+            {
+                id: 'shop_level', name: 'Shop Renovation',
+                description: `Upgrade shop to level ${this.shopLevel + 1}. Better customers!`,
+                cost: 500 * this.shopLevel, maxLevel: 10,
+                currentLevel: this.shopLevel - 1,
+                apply: () => { this.shopLevel++; }
+            }
+        ];
+    }
+
+    buyUpgrade(upgradeId, gold) {
+        const upgrade = this.getUpgrades().find(u => u.id === upgradeId);
+        if (!upgrade) return { success: false, reason: 'Upgrade not found' };
+        if (upgrade.currentLevel >= upgrade.maxLevel) return { success: false, reason: 'Already maxed!' };
+        if (gold < upgrade.cost) return { success: false, reason: `Need ${upgrade.cost}g` };
+        upgrade.apply();
+        return { success: true, cost: upgrade.cost };
+    }
+
     serialize() {
         return {
             displayItems: this.displayItems,
             maxDisplay: this.maxDisplay,
+            maxCustomers: this.maxCustomers,
+            customerInterval: this.customerInterval,
             totalSales: this.totalSales,
             totalEarnings: this.totalEarnings,
             satisfiedCustomers: this.satisfiedCustomers,
