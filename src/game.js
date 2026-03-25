@@ -47,6 +47,7 @@ class Game {
         this.gameSpeed = 1;
         this.showTutorial = true;
         this.tutorialStep = 0;
+        this.prestigeLevel = 0;
 
         // Initialize
         this.quests.autoAcceptMainQuests();
@@ -331,6 +332,7 @@ class Game {
             gameSpeed: this.gameSpeed,
             showTutorial: this.showTutorial,
             tutorialStep: this.tutorialStep,
+            prestigeLevel: this.prestigeLevel,
             inventory: this.inventory.serialize(),
             economy: this.economy.serialize(),
             crafting: this.crafting.serialize(),
@@ -357,6 +359,7 @@ class Game {
         this.gameSpeed = data.gameSpeed || 1;
         this.showTutorial = data.showTutorial !== undefined ? data.showTutorial : true;
         this.tutorialStep = data.tutorialStep || 0;
+        this.prestigeLevel = data.prestigeLevel || 0;
 
         if (data.inventory) this.inventory.deserialize(data.inventory);
         if (data.economy) this.economy.deserialize(data.economy);
@@ -386,6 +389,74 @@ class Game {
         this.screen = 'shop';
         this.audio.init();
 
-        this.notify('Welcome to Oh No Yes! Build your merchant empire!', '#ffd700', 5000);
+        // Apply prestige bonuses
+        if (this.prestigeLevel > 0) {
+            this.gold += this.prestigeLevel * 500;
+            this.baseStats.maxHp += this.prestigeLevel * 10;
+            this.baseStats.atk += this.prestigeLevel * 2;
+            this.baseStats.def += this.prestigeLevel * 2;
+            this.skills.addPoints(this.prestigeLevel * 2);
+            this.notify(`New Game+ ${this.prestigeLevel}! Prestige bonuses applied!`, '#ff44ff', 5000);
+        } else {
+            this.notify('Welcome to Oh No Yes! Build your merchant empire!', '#ffd700', 5000);
+        }
+    }
+
+    // New Game+ / Prestige system
+    canPrestige() {
+        return this.quests.completedQuests.has('void_beckons') || this.level >= 30;
+    }
+
+    startPrestige() {
+        if (!this.canPrestige()) return false;
+
+        this.prestigeLevel = (this.prestigeLevel || 0) + 1;
+        const keepGold = Math.floor(this.gold * 0.1); // Keep 10% gold
+
+        // Reset most systems but keep prestige bonuses
+        const prestigeLevel = this.prestigeLevel;
+
+        this.gold = keepGold;
+        this.level = 1;
+        this.xp = 0;
+        this.day = 1;
+        this.totalGold = keepGold;
+        this.dayPhase = 'morning';
+        this.dayTimer = 0;
+        this.baseStats = {
+            maxHp: 50, maxMp: 20, atk: 5, def: 3, speed: 5,
+            critRate: 0.05, critDmg: 0.5, dodge: 0, counter: 0,
+            lifesteal: 0
+        };
+
+        this.inventory = new Inventory();
+        this.economy = new Economy();
+        this.crafting = new CraftingSystem();
+        this.shop = new ShopSystem();
+        this.exploration = new ExplorationSystem();
+        this.skills = new SkillSystem();
+        this.reputation = new ReputationSystem();
+        this.quests = new QuestSystem();
+
+        this.quests.autoAcceptMainQuests();
+        this.prestigeLevel = prestigeLevel;
+        this.newGame();
+        this.saveGame();
+        return true;
+    }
+
+    // Statistics for display
+    getStats() {
+        return {
+            totalGold: this.totalGold,
+            totalSales: this.shop.totalSales,
+            totalCrafts: this.crafting.totalCrafts,
+            areasExplored: this.exploration.areasVisited.size,
+            bossesDefeated: this.exploration.bossesDefeated.size,
+            questsCompleted: this.quests.completedQuests.size,
+            reputation: this.reputation.reputation,
+            prestigeLevel: this.prestigeLevel || 0,
+            playDays: this.day
+        };
     }
 }

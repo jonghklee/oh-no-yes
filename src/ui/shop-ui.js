@@ -159,7 +159,7 @@ class ShopUI {
             }
         }
 
-        // === BOTTOM: Daily Summary ===
+        // === BOTTOM LEFT: Daily Summary ===
         r.panel(10, 610, 380, 140, '📊 Today\'s Summary');
         r.text(`Sales: ${shop.dailySales}`, 25, 645, '#fff', 12);
         r.text(`Earnings: ${shop.dailyEarnings}g`, 25, 665, '#ffd700', 12);
@@ -173,6 +173,39 @@ class ShopUI {
         if (inp.clickedIn(200, 710, 170, 30)) {
             game.advanceDay();
             game.audio.click();
+        }
+
+        // === BOTTOM RIGHT: Shop Upgrades ===
+        if (!shop.activeNegotiation) {
+            r.panel(400, 610, 790, 140, '🏗 Shop Upgrades');
+            const upgrades = shop.getUpgrades();
+            upgrades.forEach((upg, i) => {
+                const ux = 415 + (i % 2) * 385;
+                const uy = 645 + Math.floor(i / 2) * 48;
+                const maxed = upg.currentLevel >= upg.maxLevel;
+                const canAfford = game.gold >= upg.cost;
+                const hovered = inp.isOver(ux, uy, 370, 42);
+
+                r.roundRect(ux, uy, 370, 42, 4,
+                    hovered && !maxed ? 'rgba(60,30,100,0.5)' : 'rgba(20,10,40,0.3)', '#3d1e6d');
+                r.textBold(upg.name, ux + 8, uy + 4, maxed ? '#888' : '#fff', 11);
+                r.text(upg.description, ux + 8, uy + 20, maxed ? '#555' : '#aaa', 9);
+                r.text(maxed ? 'MAX' : `${upg.cost}g`, ux + 330, uy + 8, maxed ? '#888' : (canAfford ? '#ffd700' : '#ff6666'), 11, 'right');
+
+                // Level pips
+                for (let p = 0; p < upg.maxLevel; p++) {
+                    r.circle(ux + 340 + p * 8, uy + 30, 3, p < upg.currentLevel ? '#ffd700' : '#333');
+                }
+
+                if (hovered && inp.clicked && !maxed && canAfford) {
+                    const result = shop.buyUpgrade(upg.id, game.gold);
+                    if (result.success) {
+                        game.spendGold(result.cost);
+                        game.audio.buy();
+                        game.notify(`Upgraded ${upg.name}!`, '#44ff44');
+                    }
+                }
+            });
         }
     }
 }

@@ -198,28 +198,124 @@ class ExploreUI {
 
     static handleEvent(game, eventType) {
         switch(eventType) {
-            case 'found_chest':
+            case 'found_chest': {
                 const gold = Utils.random(20, 100) * game.level;
-                game.addGold(gold);
-                game.notify(`Found a treasure chest! +${gold}g`, '#ffd700');
+                game.showDialog(`You found a treasure chest! It contains ${gold}g. But it might be trapped...`, [
+                    { label: `Open it! (+${gold}g)`, action: () => {
+                        if (Math.random() < 0.8) {
+                            game.addGold(gold);
+                            game.notify(`Got ${gold}g from the chest!`, '#ffd700');
+                        } else {
+                            const dmg = Math.round(gold * 0.3);
+                            game.notify(`Trap! Lost ${dmg}g but found ${Math.round(gold * 0.5)}g`, '#ff8844');
+                            game.addGold(Math.round(gold * 0.5));
+                        }
+                        game.dismissDialog();
+                    }},
+                    { label: 'Leave it', action: () => {
+                        game.notify('You cautiously moved on.', '#aaa');
+                        game.dismissDialog();
+                    }}
+                ]);
                 break;
+            }
             case 'herb_patch':
-            case 'flower_field':
-                game.inventory.addItem('herb', Utils.random(3, 8));
-                game.notify('Found a patch of herbs!', '#44ff44');
+            case 'flower_field': {
+                const qty = Utils.random(3, 8);
+                game.inventory.addItem('herb', qty);
+                game.notify(`Found a patch of herbs! +${qty}`, '#44ff44');
                 break;
+            }
             case 'ore_vein':
-            case 'gem_vein':
-                game.inventory.addItem('iron_ore', Utils.random(2, 5));
-                game.notify('Found a rich ore vein!', '#ff8844');
+            case 'gem_vein': {
+                const oreQty = Utils.random(2, 5);
+                game.inventory.addItem('iron_ore', oreQty);
+                if (Math.random() < 0.15) {
+                    game.inventory.addItem('silver_ore', 1);
+                    game.notify(`Rich vein! +${oreQty} Iron Ore, +1 Silver Ore!`, '#ff8844');
+                } else {
+                    game.notify(`Found ore! +${oreQty} Iron Ore`, '#ff8844');
+                }
                 break;
+            }
             case 'ancient_shrine':
-            case 'magic_spring':
-                game.addXp(Utils.random(20, 50) * game.level);
-                game.notify('Ancient power flows through you! +XP', '#8844ff');
+            case 'magic_spring': {
+                game.showDialog('You discover a magical spring. Its waters shimmer with power.', [
+                    { label: 'Drink (+XP)', action: () => {
+                        const xp = Utils.random(20, 50) * game.level;
+                        game.addXp(xp);
+                        game.notify(`Gained ${xp} XP!`, '#8844ff');
+                        game.dismissDialog();
+                    }},
+                    { label: 'Fill a bottle (+Potion)', action: () => {
+                        game.inventory.addItem('health_potion', 2);
+                        game.notify('Collected 2 Health Potions!', '#44ff44');
+                        game.dismissDialog();
+                    }}
+                ]);
                 break;
+            }
+            case 'ghost_merchant': {
+                game.showDialog('A ghostly merchant appears! "I have rare wares... for a price."', [
+                    { label: 'Trade 100g for rare item', action: () => {
+                        if (game.gold >= 100) {
+                            game.spendGold(100);
+                            const rareItems = ['moonflower', 'crystal', 'silk', 'silver_ore', 'enchanted_wood'];
+                            const item = Utils.choice(rareItems);
+                            const qty = Utils.random(2, 5);
+                            game.inventory.addItem(item, qty);
+                            game.notify(`Bought ${qty}x ${ItemDB[item]?.name}!`, '#8844ff');
+                        } else {
+                            game.notify('Not enough gold!', '#ff4444');
+                        }
+                        game.dismissDialog();
+                    }},
+                    { label: 'Decline', action: () => {
+                        game.notify('The ghost fades away...', '#888');
+                        game.dismissDialog();
+                    }}
+                ]);
+                break;
+            }
+            case 'traveler':
+            case 'hermit': {
+                game.showDialog('You meet a weary traveler. They offer knowledge in exchange for supplies.', [
+                    { label: 'Give 5 herbs (+Rep, +XP)', action: () => {
+                        if (game.inventory.hasItem('herb', 5)) {
+                            game.inventory.removeItem('herb', 5);
+                            game.reputation.addReputation(5);
+                            game.addXp(30 * game.level);
+                            game.notify('Reputation +5, XP gained!', '#ffaa44');
+                        } else {
+                            game.notify('Not enough herbs!', '#ff4444');
+                        }
+                        game.dismissDialog();
+                    }},
+                    { label: 'Just chat', action: () => {
+                        game.addXp(10);
+                        game.notify('Pleasant conversation. +10 XP', '#aaa');
+                        game.dismissDialog();
+                    }}
+                ]);
+                break;
+            }
+            case 'treasure_room':
+            case 'treasure_hoard': {
+                const treasureGold = Utils.random(100, 500) * game.level;
+                game.addGold(treasureGold);
+                game.notify(`Treasure room! +${treasureGold}g!`, '#ffd700');
+                // Also chance for gems
+                if (Math.random() < 0.3) {
+                    const gems = ['ruby', 'sapphire', 'emerald'];
+                    const gem = Utils.choice(gems);
+                    game.inventory.addItem(gem, 1);
+                    game.notify(`Also found a ${ItemDB[gem]?.name}!`, '#ff44ff');
+                }
+                break;
+            }
             default:
-                game.notify(`Discovered: ${eventType.replace(/_/g, ' ')}`, '#aaaaff');
+                game.addXp(Utils.random(5, 15) * game.level);
+                game.notify(`Discovered: ${eventType.replace(/_/g, ' ')} (+XP)`, '#aaaaff');
         }
     }
 }
@@ -323,17 +419,49 @@ class QuestUI {
             avY += 60;
         });
 
-        // Completed quests count
-        r.panel(600, 415, 590, 340, '🏆 Completed');
-        r.text(`Total Completed: ${quests.completedQuests.size}`, 620, 450, '#ffd700', 13);
+        // Completed quests & Stats
+        r.panel(600, 415, 295, 340, '🏆 Completed');
+        r.text(`Total: ${quests.completedQuests.size}`, 620, 445, '#ffd700', 11);
 
-        let cy = 475;
+        let cy = 465;
         [...quests.completedQuests].forEach(qid => {
             const q = QuestDB[qid];
             if (q && cy < 730) {
-                r.text(`✓ ${q.name}`, 620, cy, '#88ff88', 11);
-                cy += 18;
+                r.text(`✓ ${q.name}`, 615, cy, '#88ff88', 10);
+                cy += 16;
             }
         });
+
+        // Game Statistics & Prestige
+        r.panel(900, 415, 290, 340, '📈 Statistics');
+        const stats = game.getStats();
+        const statRows = [
+            { label: 'Days Played', value: stats.playDays, color: '#fff' },
+            { label: 'Total Gold Earned', value: Utils.formatGold(stats.totalGold), color: '#ffd700' },
+            { label: 'Total Sales', value: stats.totalSales, color: '#88ff88' },
+            { label: 'Items Crafted', value: stats.totalCrafts, color: '#4488ff' },
+            { label: 'Areas Explored', value: `${stats.areasExplored}/9`, color: '#44ddff' },
+            { label: 'Bosses Defeated', value: stats.bossesDefeated, color: '#ff4444' },
+            { label: 'Reputation', value: stats.reputation, color: '#ffaa44' },
+            { label: 'Prestige Level', value: stats.prestigeLevel, color: '#ff44ff' }
+        ];
+
+        statRows.forEach((row, i) => {
+            r.text(row.label + ':', 915, 450 + i * 20, '#888', 10);
+            r.textBold(row.value.toString(), 1150, 450 + i * 20, row.color, 11, 'right');
+        });
+
+        // New Game+ button
+        if (game.canPrestige()) {
+            const ngHover = inp.isOver(920, 620, 250, 35);
+            r.button(920, 620, 250, 35, `⭐ New Game+ (Prestige ${(game.prestigeLevel || 0) + 1})`, ngHover, false, '#5a2080');
+            if (inp.clickedIn(920, 620, 250, 35)) {
+                game.showDialog('Start New Game+? Keep 10% gold, gain permanent stat bonuses!', [
+                    { label: 'Prestige!', action: () => { game.startPrestige(); game.dismissDialog(); } },
+                    { label: 'Not yet', action: () => game.dismissDialog() }
+                ]);
+            }
+            r.text('Keep 10% gold + permanent bonuses', 930, 660, '#aa88ff', 9);
+        }
     }
 }
