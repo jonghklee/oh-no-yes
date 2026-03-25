@@ -85,6 +85,80 @@ class CombatSystem {
         return { type: 'hit', damage, isCrit };
     }
 
+    playerPowerStrike() {
+        if (this.state !== 'playerTurn' || this.animating) return;
+        const mpCost = 8;
+        if (this.player.currentMp < mpCost) {
+            this.addLog('Not enough MP!');
+            return null;
+        }
+        this.player.currentMp -= mpCost;
+
+        let damage = Math.max(1, this.player.atk * 2 - this.enemy.def * 0.3);
+        const isCrit = Math.random() < (this.player.critRate || 0) + 0.1;
+        if (isCrit) damage *= 1.5 + (this.player.critDmg || 0);
+        damage = Math.round(damage);
+
+        this.enemy.currentHp = Math.max(0, this.enemy.currentHp - damage);
+        this.enemyShake = 15;
+        this.addLog(`Power Strike! ${damage} damage!${isCrit ? ' CRITICAL!' : ''}`);
+
+        if (this.enemy.currentHp <= 0) {
+            this.state = 'victory';
+            this.addLog(`${this.enemy.name} defeated!`);
+            return { type: 'victory', damage, isCrit };
+        }
+        this.startEnemyTurn();
+        return { type: 'hit', damage, isCrit };
+    }
+
+    playerDoubleSlash() {
+        if (this.state !== 'playerTurn' || this.animating) return;
+        const mpCost = 5;
+        if (this.player.currentMp < mpCost) {
+            this.addLog('Not enough MP!');
+            return null;
+        }
+        this.player.currentMp -= mpCost;
+
+        let totalDmg = 0;
+        for (let i = 0; i < 2; i++) {
+            let dmg = Math.max(1, this.player.atk * 0.7 - this.enemy.def * 0.4);
+            dmg = Math.round(dmg);
+            this.enemy.currentHp = Math.max(0, this.enemy.currentHp - dmg);
+            totalDmg += dmg;
+        }
+        this.enemyShake = 12;
+        this.addLog(`Double Slash! ${totalDmg} total damage!`);
+
+        if (this.enemy.currentHp <= 0) {
+            this.state = 'victory';
+            this.addLog(`${this.enemy.name} defeated!`);
+            return { type: 'victory', damage: totalDmg, isCrit: false };
+        }
+        this.startEnemyTurn();
+        return { type: 'hit', damage: totalDmg, isCrit: false };
+    }
+
+    playerWarCry() {
+        if (this.state !== 'playerTurn' || this.animating) return;
+        const mpCost = 10;
+        if (this.player.currentMp < mpCost) {
+            this.addLog('Not enough MP!');
+            return null;
+        }
+        this.player.currentMp -= mpCost;
+
+        const atkBuff = Math.round(this.player.atk * 0.3);
+        const defBuff = Math.round(this.player.def * 0.2);
+        this.player.atk += atkBuff;
+        this.player.def += defBuff;
+        this.addLog(`War Cry! ATK +${atkBuff}, DEF +${defBuff} for this battle!`);
+
+        this.startEnemyTurn();
+        return { type: 'buff', atkBuff, defBuff };
+    }
+
     playerUsePotion(potionItem) {
         if (this.state !== 'playerTurn' || this.animating) return false;
         if (!potionItem || !potionItem.effect) return false;

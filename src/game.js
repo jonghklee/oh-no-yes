@@ -18,6 +18,11 @@ class Game {
         this.skills = new SkillSystem();
         this.reputation = new ReputationSystem();
         this.quests = new QuestSystem();
+        this.enchantment = new EnchantmentSystem();
+        this.prestige = new PrestigeSystem();
+        this.pets = new PetSystem();
+        this.achievements = new AchievementSystem();
+        this.npcRelations = new NpcRelationshipSystem();
 
         // Player state
         this.gold = 100;
@@ -340,7 +345,9 @@ class Game {
             exploration: this.exploration.serialize(),
             skills: this.skills.serialize(),
             reputation: this.reputation.serialize(),
-            quests: this.quests.serialize()
+            quests: this.quests.serialize(),
+            enchantment: this.enchantment.serialize(),
+            prestige: this.prestige.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -369,6 +376,8 @@ class Game {
         if (data.skills) this.skills.deserialize(data.skills);
         if (data.reputation) this.reputation.deserialize(data.reputation);
         if (data.quests) this.quests.deserialize(data.quests);
+        if (data.enchantment) this.enchantment.deserialize(data.enchantment);
+        if (data.prestige) this.prestige.deserialize(data.prestige);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';

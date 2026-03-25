@@ -63,7 +63,7 @@ class CombatUI {
 
         // === ACTIONS ===
         if (combat.state === 'playerTurn') {
-            r.panel(550, 520, 400, 200, '⚡ Actions');
+            r.panel(550, 520, 400, 210, '⚡ Actions');
 
             // Attack
             const atkHover = inp.isOver(570, 555, 170, 40);
@@ -88,15 +88,44 @@ class CombatUI {
                 game.audio.click();
             }
 
-            // Use Potion
+            // MP bar
+            r.text(`MP: ${combat.player.currentMp}/${combat.player.maxMp || 20}`, 570, 600, '#4488ff', 11);
+            r.progressBar(630, 602, 80, 8, combat.player.currentMp, combat.player.maxMp || 20, '#4488ff', '#222');
+
+            // Special abilities
+            const abilities = [
+                { name: '⚡ Power Strike', cost: 8, action: () => {
+                    const r = combat.playerPowerStrike();
+                    if (r) { game.audio.crit(); game.particles.damage(ex, ey + 30, r.damage, r.isCrit); game.renderer.shake(250); }
+                }},
+                { name: '✂ Double Slash', cost: 5, action: () => {
+                    const r = combat.playerDoubleSlash();
+                    if (r) { game.audio.hit(); game.particles.damage(ex, ey + 30, r.damage, false); game.renderer.shake(150); }
+                }},
+                { name: '📢 War Cry', cost: 10, action: () => {
+                    const r = combat.playerWarCry();
+                    if (r) { game.audio.levelUp(); game.particles.floatingText(px, py, 'BUFF!', '#ffd700'); }
+                }}
+            ];
+
+            abilities.forEach((ab, i) => {
+                const abx = 570 + i * 130;
+                const aby = 618;
+                const canUse = combat.player.currentMp >= ab.cost;
+                const abHover = inp.isOver(abx, aby, 120, 28);
+                r.button(abx, aby, 120, 28, `${ab.name} (${ab.cost})`, abHover, !canUse, '#2a3a5a');
+                if (canUse && inp.clickedIn(abx, aby, 120, 28)) { ab.action(); }
+            });
+
+            // Potions
             const potions = game.inventory.getItemsByCategory('potion');
             if (potions.length > 0) {
-                let potY = 610;
+                let potY = 653;
                 potions.slice(0, 3).forEach((potion, i) => {
-                    const potHover = inp.isOver(570 + i * 130, potY, 120, 30);
-                    r.button(570 + i * 130, potY, 120, 30,
-                        `${potion.icon} ${potion.name.split(' ')[0]} (${potion.quantity})`, potHover);
-                    if (inp.clickedIn(570 + i * 130, potY, 120, 30)) {
+                    const potHover = inp.isOver(570 + i * 130, potY, 120, 26);
+                    r.button(570 + i * 130, potY, 120, 26,
+                        `${potion.icon} ${potion.name.split(' ')[0]} (${potion.quantity})`, potHover, false, '#2a4a2a');
+                    if (inp.clickedIn(570 + i * 130, potY, 120, 26)) {
                         if (combat.playerUsePotion(potion)) {
                             game.inventory.removeItem(potion.id, 1);
                             game.audio.heal();
@@ -106,9 +135,9 @@ class CombatUI {
             }
 
             // Flee
-            const fleeHover = inp.isOver(570, 660, 170, 35);
-            r.button(570, 660, 170, 35, '🏃 Flee', fleeHover, false, '#5a2020');
-            if (inp.clickedIn(570, 660, 170, 35)) {
+            const fleeHover = inp.isOver(570, 690, 170, 28);
+            r.button(570, 690, 170, 28, '🏃 Flee', fleeHover, false, '#5a2020');
+            if (inp.clickedIn(570, 690, 170, 28)) {
                 const bonuses = game.getSkillBonuses();
                 const fled = combat.playerFlee(bonuses.guaranteedEscape);
                 if (fled) {

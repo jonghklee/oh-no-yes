@@ -14,6 +14,8 @@ class ShopSystem {
         this.satisfiedCustomers = 0;
         this.shopLevel = 1;
         this.activeNegotiation = null;
+        this.autoSellEnabled = false;
+        this.autoSellMinRarity = 'common'; // auto-sell items of this rarity or lower
     }
 
     addToDisplay(itemId, qty, inventory) {
