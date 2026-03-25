@@ -45,6 +45,11 @@
                 game.renderer.tooltip(game.input.mouseX + 15, game.input.mouseY + 15, game.tooltipItem);
             }
 
+            // Tutorial overlay
+            if (game.showTutorial) {
+                HUD.renderTutorial(game);
+            }
+
             // Dialog on top of everything
             if (game.dialogMessage) {
                 DialogUI.render(game);

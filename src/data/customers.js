@@ -143,8 +143,8 @@ function generateCustomer(day, reputation) {
     });
     const template = Utils.weightedChoice(available, weights);
     const budget = Utils.random(template.budget[0], template.budget[1]);
-    // Scale budget with day
-    const scaledBudget = Math.floor(budget * (1 + day * 0.02));
+    // Scale budget with day (faster scaling for better progression feel)
+    const scaledBudget = Math.floor(budget * (1 + day * 0.05 + Math.floor(day / 30) * 0.3));
 
     return {
         ...Utils.deepClone(template),

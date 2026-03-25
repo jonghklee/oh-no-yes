@@ -165,7 +165,7 @@ class ExplorationSystem {
     }
 
     newDay() {
-        this.restStamina(Math.round(this.maxStamina * 0.3)); // Restore 30% stamina per day
+        this.restStamina(Math.round(this.maxStamina * 0.5)); // Restore 50% stamina per day
     }
 
     addLog(msg) {

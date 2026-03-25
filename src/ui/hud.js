@@ -130,4 +130,82 @@ class HUD {
             r.resetAlpha();
         }
     }
+
+    static renderTutorial(game) {
+        if (!game.showTutorial || game.screen === 'title') return;
+
+        const r = game.renderer;
+        const inp = game.input;
+
+        const tutorials = [
+            {
+                screen: 'shop', step: 0,
+                title: 'Welcome to Your Shop!',
+                text: 'Click items in "Quick Stock" to add them to your display.\nCustomers will browse and offer to buy displayed items.',
+                highlight: { x: 10, y: 330, w: 380, h: 70 }
+            },
+            {
+                screen: 'shop', step: 1,
+                title: 'Negotiations',
+                text: 'When customers offer, you can Accept, Haggle for more,\nor Refuse. Happy customers boost your reputation!',
+                highlight: { x: 400, y: 400, w: 790, h: 200 }
+            },
+            {
+                screen: 'craft', step: 2,
+                title: 'Crafting',
+                text: 'Craft items to sell or use! Unlock new stations\nfor advanced recipes. Crafting levels up over time.',
+                highlight: { x: 200, y: 55, w: 500, h: 700 }
+            },
+            {
+                screen: 'explore', step: 3,
+                title: 'Exploration',
+                text: 'Explore areas to gather materials and fight enemies.\nHigher floors have better loot but tougher foes!',
+                highlight: { x: 25, y: 90, w: 370, h: 190 }
+            },
+        ];
+
+        const current = tutorials.find(t => t.step === game.tutorialStep);
+        if (!current) {
+            game.showTutorial = false;
+            return;
+        }
+        if (current.screen !== game.screen) return;
+
+        // Dim everything except highlight
+        r.setAlpha(0.5);
+        r.fillRect(0, 44, 1200, 711, '#000');
+        r.resetAlpha();
+
+        // Highlight area
+        if (current.highlight) {
+            const h = current.highlight;
+            r.strokeRect(h.x, h.y, h.w, h.h, '#ffd700', 3);
+        }
+
+        // Tutorial box
+        const bx = 350, by = 300, bw = 500, bh = 140;
+        r.roundRect(bx, by, bw, bh, 10, 'rgba(20,10,50,0.98)', '#ffd700', 2);
+        r.textBold(current.title, bx + bw / 2, by + 15, '#ffd700', 18, 'center');
+
+        const lines = current.text.split('\n');
+        lines.forEach((line, i) => {
+            r.text(line, bx + bw / 2, by + 50 + i * 20, '#ddd', 12, 'center');
+        });
+
+        // Next/Skip buttons
+        const nextHover = inp.isOver(bx + bw / 2 - 60, by + bh - 40, 120, 30);
+        r.button(bx + bw / 2 - 60, by + bh - 40, 120, 30, 'Got it!', nextHover);
+        if (inp.clickedIn(bx + bw / 2 - 60, by + bh - 40, 120, 30)) {
+            game.tutorialStep++;
+            game.audio.click();
+        }
+
+        const skipHover = inp.isOver(bx + bw - 80, by + 5, 70, 22);
+        r.roundRect(bx + bw - 80, by + 5, 70, 22, 3, skipHover ? '#5a3090' : 'transparent');
+        r.text('Skip all', bx + bw - 45, by + 8, '#888', 10, 'center');
+        if (inp.clickedIn(bx + bw - 80, by + 5, 70, 22)) {
+            game.showTutorial = false;
+            game.audio.click();
+        }
+    }
 }
