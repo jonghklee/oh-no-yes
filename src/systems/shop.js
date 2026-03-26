@@ -82,11 +82,17 @@ class ShopSystem {
                             this.startNegotiation(customer, wanted, economy, skillBonuses);
                         }
                     } else {
-                        // Nothing to buy, leave
+                        // Nothing to buy, determine reason
                         customer.currentPatience--;
                         customer.browseTimer = 0;
                         if (customer.currentPatience <= 0) {
-                            results.push({ type: 'customerLeft', customer });
+                            // Determine why customer left
+                            let leaveReason = 'Nothing interesting';
+                            if (this.displayItems.length === 0) leaveReason = 'Empty display!';
+                            else if (!this.displayItems.some(i => customer.preferredCategories.includes(i.category))) {
+                                leaveReason = `Wanted ${customer.wantedCategory} items`;
+                            } else leaveReason = 'Too expensive';
+                            results.push({ type: 'customerLeft', customer, reason: leaveReason });
                             this.customers.splice(i, 1);
                         }
                     }

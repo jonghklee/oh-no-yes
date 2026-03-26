@@ -462,6 +462,9 @@ class Game {
             for (const r of results) {
                 if (r.type === 'customerLeft') {
                     this.reputation.loseReputation(1);
+                    if (r.reason) {
+                        this.notify(`${r.customer.icon} ${r.customer.name} left: "${r.reason}"`, '#888', 2000);
+                    }
                 }
             }
         }
