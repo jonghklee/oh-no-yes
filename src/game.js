@@ -271,6 +271,28 @@ class Game {
             }
         }
 
+        // Urgent order (random chance each day, level 5+)
+        if (this.level >= 5 && Math.random() < 0.2) {
+            const urgentItems = ['iron_sword', 'steel_sword', 'health_potion', 'leather_armor', 'iron_armor',
+                                 'copper_ring', 'silver_necklace', 'bread', 'stew'];
+            const itemId = Utils.choice(urgentItems);
+            const item = ItemDB[itemId];
+            if (item) {
+                const qty = Utils.random(1, 3);
+                const reward = Math.round(item.basePrice * qty * 3);
+                this._urgentOrder = { itemId, qty, reward, daysLeft: 3 };
+                this.notify(`🚨 Urgent Order: ${qty}x ${item.icon}${item.name} for ${reward}g! (3 days)`, '#ff4444', 5000);
+            }
+        }
+        // Check urgent order expiry
+        if (this._urgentOrder) {
+            this._urgentOrder.daysLeft--;
+            if (this._urgentOrder.daysLeft <= 0) {
+                this.notify('🚨 Urgent order expired!', '#ff4444');
+                this._urgentOrder = null;
+            }
+        }
+
         // Lucky spin reminder
         if (this.luckySpin.canSpin(this.day)) {
             this.notify('🎰 Daily Lucky Spin available! Check Shop tab.', '#ff44ff');

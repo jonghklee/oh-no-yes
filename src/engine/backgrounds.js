@@ -138,4 +138,41 @@ class BackgroundRenderer {
         }
         r.resetAlpha();
     }
+
+    // Weather overlay - called after main background
+    static renderWeather(r, day, time) {
+        const t = time / 1000;
+        // Deterministic weather based on day
+        const weatherSeed = (day * 7 + 3) % 10;
+        if (weatherSeed < 3) return; // Clear (30%)
+
+        if (weatherSeed < 5) {
+            // Rain (20%)
+            r.setAlpha(0.15);
+            for (let i = 0; i < 15; i++) {
+                const x = (t * 100 + i * 83) % 1200;
+                const y = (t * 300 + i * 127) % 700 + 50;
+                r.line(x, y, x - 2, y + 8, '#4488cc');
+            }
+            r.resetAlpha();
+        } else if (weatherSeed < 7) {
+            // Snow (20%) - winter aesthetic
+            r.setAlpha(0.2);
+            for (let i = 0; i < 12; i++) {
+                const x = (Math.sin(t * 0.5 + i * 2.3) * 600 + 600);
+                const y = (t * 30 + i * 67) % 700 + 50;
+                r.circle(x, y, 1.5, '#ddeeff');
+            }
+            r.resetAlpha();
+        } else if (weatherSeed < 9) {
+            // Fog (20%)
+            r.setAlpha(0.03);
+            for (let i = 0; i < 4; i++) {
+                const y = 400 + i * 80 + Math.sin(t * 0.3 + i) * 30;
+                r.fillRect(0, y, 1200, 40, '#aaaacc');
+            }
+            r.resetAlpha();
+        }
+        // weatherSeed 9 = windy (10%) - just visual effect
+    }
 }

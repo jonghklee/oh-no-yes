@@ -68,6 +68,27 @@ class ShopUI {
         }
         r.text('Right-click to remove | Add from Items tab', 20, 298, '#555', 9);
 
+        // Urgent order display
+        if (game._urgentOrder) {
+            const uo = game._urgentOrder;
+            const uItem = ItemDB[uo.itemId];
+            const hasEnough = game.inventory.hasItem(uo.itemId, uo.qty);
+            r.roundRect(20, 307, 370, 22, 3, 'rgba(80,20,20,0.6)', '#ff4444');
+            r.text(`🚨 ${uo.qty}x ${uItem?.icon||'?'}${uItem?.name||''} → ${uo.reward}g (${uo.daysLeft}d)`, 28, 310, '#ff8888', 9);
+            if (hasEnough) {
+                const fulfillHover = inp.isOver(300, 307, 80, 20);
+                r.button(300, 307, 80, 20, '✅ Fulfill', fulfillHover, false, '#2a5a2a');
+                if (inp.clickedIn(300, 307, 80, 20)) {
+                    game.inventory.removeItem(uo.itemId, uo.qty);
+                    game.addGold(uo.reward);
+                    game.notify(`🚨 Urgent order fulfilled! +${uo.reward}g!`, '#44ff44', 4000);
+                    game.audio.victory();
+                    game.particles.goldGain(300, 310, uo.reward);
+                    game._urgentOrder = null;
+                }
+            }
+        }
+
         // Quick add buttons for inventory items
         const sellableItems = game.inventory.getItemList().filter(item =>
             item.basePrice > 0 && !item.quest

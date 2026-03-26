@@ -22,8 +22,11 @@
         if (game.screen === 'title') {
             TitleScreen.render(game);
         } else {
-            // Animated background per screen
+            // Animated background per screen + weather
             BackgroundRenderer.render(game.renderer, game.screen, currentTime);
+            if (game.screen !== 'combat') {
+                BackgroundRenderer.renderWeather(game.renderer, game.day, currentTime);
+            }
 
             // Render current screen
             switch(game.screen) {
