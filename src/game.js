@@ -380,6 +380,14 @@ class Game {
             this.notify(`🗓 New Month! Monthly bonus: +${monthBonus}g`, '#44ddff', 4000);
         }
 
+        // Day milestones
+        const dayMilestones = { 50: 1000, 200: 5000, 300: 10000, 500: 25000, 730: 50000, 1000: 100000 };
+        if (dayMilestones[this.day]) {
+            this.addGold(dayMilestones[this.day]);
+            this.notify(`📅 Day ${this.day} milestone! +${Utils.formatGold(dayMilestones[this.day])}g!`, '#ffd700', 4000);
+            this.particles.burst(600, 400, 12, '#ffd700', 3);
+        }
+
         // Secret events on special days
         if (this.day === 100) {
             this.notify('🌟 Day 100! A mysterious merchant appears...', '#ff44ff', 5000);
