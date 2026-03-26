@@ -62,6 +62,10 @@ class HUD {
             game.audio.click();
         }
 
+        // Login reward cycle indicator
+        const lrDay = game.loginRewards.getDayInCycle();
+        r.text(`📅${lrDay}/7`, 960, 14, lrDay === 7 ? '#ffd700' : '#888', 10);
+
         // Daily challenge mini-display
         const dc = game.daily.currentChallenge;
         if (dc && !game.daily.completedToday) {

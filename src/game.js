@@ -30,6 +30,7 @@ class Game {
         this.marketOrders = new MarketOrderSystem();
         this.challengeMode = new ChallengeModeSystem();
         this.statsTracker = new StatsTracker();
+        this.loginRewards = new LoginRewardSystem();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -224,6 +225,29 @@ class Game {
         // Generate daily challenge
         const challenge = this.daily.generateChallenge(this.day, this.level);
         this.notify(`📋 Daily: ${challenge.name} - ${challenge.desc.replace('{target}', challenge.target)}`, '#44ddff', 5000);
+
+        // Daily login reward
+        if (this.loginRewards.canClaim(this.day)) {
+            const reward = this.loginRewards.claim(this.day);
+            if (reward) {
+                if (reward.type === 'gold') {
+                    this.addGold(reward.value);
+                    this.notify(`📅 Day ${this.loginRewards.getDayInCycle()}/7: ${reward.icon} +${reward.value}g!`, '#ffd700', 4000);
+                } else if (reward.type === 'item') {
+                    this.inventory.addItem(reward.item, reward.qty);
+                    this.notify(`📅 Day ${this.loginRewards.getDayInCycle()}/7: ${reward.icon} ${reward.name}!`, '#44ff44', 4000);
+                } else if (reward.type === 'skillPoint') {
+                    this.skills.addPoints(reward.value);
+                    this.notify(`📅 Day ${this.loginRewards.getDayInCycle()}/7: ${reward.icon} +1 Skill Point!`, '#ff44ff', 4000);
+                } else if (reward.type === 'mega') {
+                    this.addGold(reward.gold);
+                    for (const item of reward.items) this.inventory.addItem(item.item, item.qty);
+                    this.notify(`📅 Day 7/7: ${reward.icon} MEGA REWARD! +${reward.gold}g + items!`, '#ffd700', 5000);
+                    this.audio.victory();
+                    this.particles.burst(600, 400, 25, '#ffd700', 5);
+                }
+            }
+        }
 
         // Lucky spin reminder
         if (this.luckySpin.canSpin(this.day)) {
@@ -733,7 +757,8 @@ class Game {
             fusion: this.fusion.serialize(),
             marketOrders: this.marketOrders.serialize(),
             challengeMode: this.challengeMode.serialize(),
-            statsTracker: this.statsTracker.serialize()
+            statsTracker: this.statsTracker.serialize(),
+            loginRewards: this.loginRewards.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -780,6 +805,7 @@ class Game {
         if (data.marketOrders) this.marketOrders.deserialize(data.marketOrders);
         if (data.challengeMode) this.challengeMode.deserialize(data.challengeMode);
         if (data.statsTracker) this.statsTracker.deserialize(data.statsTracker);
+        if (data.loginRewards) this.loginRewards.deserialize(data.loginRewards);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';
