@@ -25,7 +25,11 @@ class SkillsUI {
             r.roundRect(tx, 102, 285, 30, 4,
                 isActive ? tree.color + '44' : (hovered ? tree.color + '22' : 'transparent'),
                 isActive ? tree.color : '#333');
+            // Count invested points in this tree
+            const invested = Object.keys(tree.skills).filter(sid => skills.unlockedSkills.has(sid)).length;
+            const total = Object.keys(tree.skills).length;
             r.textBold(`${tree.icon} ${tree.name}`, tx + 15, 108, isActive ? '#fff' : '#888', 13);
+            r.text(`${invested}/${total}`, tx + 260, 110, invested === total ? '#44ff44' : '#888', 9, 'right');
 
             if (inp.clickedIn(tx, 102, 285, 30)) {
                 SkillsUI.selectedTree = id;
