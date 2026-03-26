@@ -600,16 +600,37 @@ class QuestUI {
             avY += 60;
         });
 
-        // Completed quests & Stats
-        r.panel(600, 415, 295, 340, '🏆 Completed');
-        r.text(`Total: ${quests.completedQuests.size}`, 620, 445, '#ffd700', 11);
+        // Completed quests & Codex
+        r.panel(600, 415, 295, 340, '🏆 Completed & 📖 Codex');
 
-        let cy = 465;
-        [...quests.completedQuests].forEach(qid => {
+        // Codex summary
+        const codex = game.codex;
+        const totalEnemies = Object.keys(EnemyDB).length;
+        const totalItems = Object.keys(ItemDB).length;
+        r.text(`📖 Codex: ${codex.getDiscoveryPercent()}% discovered`, 615, 440, '#44ddff', 10);
+        r.text(`Enemies: ${codex.discoveredEnemies.size}/${totalEnemies}`, 615, 456, '#ff8844', 9);
+        r.text(`Items: ${codex.discoveredItems.size}/${totalItems}`, 750, 456, '#44ff44', 9);
+
+        // Show discovered enemies as icons
+        let cx = 615;
+        let ey = 472;
+        [...codex.discoveredEnemies].forEach(eid => {
+            const enemy = EnemyDB[eid];
+            if (enemy && cx < 870) {
+                r.text(enemy.icon, cx, ey, '#fff', 12);
+                cx += 18;
+                if (cx > 870) { cx = 615; ey += 16; }
+            }
+        });
+
+        // Quest completions below
+        r.text(`Quests: ${quests.completedQuests.size}`, 615, Math.max(ey + 20, 510), '#ffd700', 10);
+        let cy = Math.max(ey + 34, 524);
+        [...quests.completedQuests].slice(-8).forEach(qid => {
             const q = QuestDB[qid];
-            if (q && cy < 730) {
-                r.text(`✓ ${q.name}`, 615, cy, '#88ff88', 10);
-                cy += 16;
+            if (q && cy < 740) {
+                r.text(`✓ ${q.name}`, 615, cy, '#88ff88', 9);
+                cy += 14;
             }
         });
 

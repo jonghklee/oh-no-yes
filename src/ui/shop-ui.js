@@ -196,6 +196,7 @@ class ShopUI {
                         game.reputation.loseReputation(2);
                     } else {
                         game.audio.click();
+                        game.trackDaily('haggle', 1);
                     }
                 }
             }
