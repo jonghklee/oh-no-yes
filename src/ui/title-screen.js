@@ -61,7 +61,10 @@ class TitleScreen {
             try {
                 const saveData = JSON.parse(localStorage.getItem('ohnoyes_save'));
                 if (saveData) {
-                    const preview = `Lv.${saveData.level || 1} | Day ${saveData.day || 1} | ${Utils.formatGold(saveData.gold || 0)}g`;
+                    const ptMin = Math.floor((saveData.playtimeMs || 0) / 60000);
+                    const ptH = Math.floor(ptMin / 60);
+                    const ptM = ptMin % 60;
+                    const preview = `Lv.${saveData.level || 1} | Day ${saveData.day || 1} | ${Utils.formatGold(saveData.gold || 0)}g | ${ptH}h${ptM}m`;
                     r.text(preview, 600, contBtnY + 38, '#6a9a6a', 11, 'center');
                     if (saveData.prestigeLevel > 0) {
                         r.text(`⭐ Prestige ${saveData.prestigeLevel}`, 600, contBtnY + 53, '#aa88ff', 9, 'center');

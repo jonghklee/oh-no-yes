@@ -115,6 +115,13 @@ class SettingsUI {
         r.textBold('Game Stats', px + 20, sy, '#ddd', 14);
         sy += 22;
         const stats = game.getStats();
+
+        // Playtime
+        const totalMin = Math.floor(game.playtimeMs / 60000);
+        const hours = Math.floor(totalMin / 60);
+        const mins = totalMin % 60;
+        r.text(`⏱ Playtime: ${hours}h ${mins}m | Sessions: ${game.sessions || 1}`, px + 30, sy, '#44ddff', 10);
+        sy += 16;
         r.text(`Days: ${stats.playDays} | Level: ${game.level} | Gold: ${Utils.formatGold(stats.totalGold)}`, px + 30, sy, '#888', 10);
         sy += 16;
         r.text(`Sales: ${stats.totalSales} | Crafts: ${stats.totalCrafts} | Bosses: ${stats.bossesDefeated}`, px + 30, sy, '#888', 10);

@@ -65,6 +65,8 @@ class Game {
         this.showTutorial = true;
         this.tutorialStep = 0;
         this.prestigeLevel = 0;
+        this.playtimeMs = 0; // total playtime in milliseconds
+        this.sessions = 0;
 
         // Initialize
         this.quests.autoAcceptMainQuests();
@@ -357,6 +359,9 @@ class Game {
                 this.particles.sparkle(600, 400, spinResult.color);
             }
         }
+
+        // Playtime tracking
+        this.playtimeMs += dt;
 
         // Sell combo timer decay
         if (this._sellCombo && this._sellCombo.timer > 0) {
@@ -698,6 +703,8 @@ class Game {
             showTutorial: this.showTutorial,
             tutorialStep: this.tutorialStep,
             prestigeLevel: this.prestigeLevel,
+            playtimeMs: this.playtimeMs,
+            sessions: this.sessions,
             inventory: this.inventory.serialize(),
             economy: this.economy.serialize(),
             crafting: this.crafting.serialize(),
@@ -741,6 +748,8 @@ class Game {
         this.showTutorial = (data.day || 1) <= 3 ? (data.showTutorial !== undefined ? data.showTutorial : true) : false;
         this.tutorialStep = data.tutorialStep || 0;
         this.prestigeLevel = data.prestigeLevel || 0;
+        this.playtimeMs = data.playtimeMs || 0;
+        this.sessions = (data.sessions || 0) + 1;
 
         if (data.inventory) this.inventory.deserialize(data.inventory);
         if (data.economy) this.economy.deserialize(data.economy);
@@ -827,7 +836,8 @@ class Game {
         this.inventory.addItem('leather_armor', 1);
         this.inventory.equip('wooden_sword');
         this.inventory.equip('leather_armor');
-        this.gold = 150; // Slightly more starting gold
+        this.gold = 150;
+        this.sessions = 1;
 
         this.economy.updatePrices(1);
         this.screen = 'shop';
