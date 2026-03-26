@@ -102,6 +102,13 @@ class CraftingUI {
                 r.textBold(result.name, 260, ry + 6, canCraft.can ? RarityColors[result.rarity] : '#666', 13);
                 r.text(`x${recipe.resultQty}`, 260 + r.measureText(result.name, 13) + 5, ry + 8, '#aaa', 10);
 
+                // Profitability indicator
+                const sellValue = game.economy.getSellPrice(recipe.result, 1.0, bonuses) * recipe.resultQty;
+                const matCost = recipe.ingredients.reduce((sum, ing) => sum + (game.economy.getPrice(ing.item) * ing.qty), 0);
+                const profit = sellValue - matCost;
+                const profitColor = profit > 0 ? '#44ff44' : profit === 0 ? '#aaa' : '#ff4444';
+                r.text(`${profit >= 0 ? '+' : ''}${profit}g`, 690, ry + 6, profitColor, 9, 'right');
+
                 // Ingredients preview
                 let ix = 260;
                 const ingText = recipe.ingredients.map(ing => {
