@@ -54,11 +54,12 @@ class HUD {
             game.audio.click();
         }
 
-        // Save indicator
-        r.text('💾', 1135, 14, '#666', 12);
+        // Settings button
+        const settingsHover = inp.isOver(1135, 8, 30, 28);
+        r.text('⚙', 1140, 12, settingsHover ? '#fff' : '#666', 14);
         if (inp.clickedIn(1135, 8, 30, 28)) {
-            game.saveGame();
-            game.notify('Game saved!', '#44ff44');
+            SettingsUI.toggle();
+            game.audio.click();
         }
 
         // Daily challenge mini-display

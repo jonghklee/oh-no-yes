@@ -6,7 +6,7 @@
     let lastTime = performance.now();
 
     function gameLoop(currentTime) {
-        const dt = Math.min(currentTime - lastTime, 100); // cap delta
+        const dt = Math.min(currentTime - lastTime, 100);
         lastTime = currentTime;
 
         // Clear
@@ -22,6 +22,9 @@
         if (game.screen === 'title') {
             TitleScreen.render(game);
         } else {
+            // Animated background per screen
+            BackgroundRenderer.render(game.renderer, game.screen, currentTime);
+
             // Render current screen
             switch(game.screen) {
                 case 'shop': ShopUI.render(game); break;
@@ -34,13 +37,13 @@
                 case 'map': MapUI.render(game); break;
             }
 
-            // HUD always on top (except title)
+            // HUD always on top
             HUD.render(game);
 
             // Particles on top
             game.particles.render(game.renderer);
 
-            // Tooltip on top of everything
+            // Tooltip
             if (game.tooltipItem) {
                 game.renderer.tooltip(game.input.mouseX + 15, game.input.mouseY + 15, game.tooltipItem);
             }
@@ -48,6 +51,11 @@
             // Tutorial overlay
             if (game.showTutorial) {
                 HUD.renderTutorial(game);
+            }
+
+            // Settings overlay
+            if (SettingsUI.visible) {
+                SettingsUI.render(game);
             }
 
             // Dialog on top of everything

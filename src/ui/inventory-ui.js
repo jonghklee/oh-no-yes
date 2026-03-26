@@ -166,8 +166,31 @@ class InventoryUI {
             // Action buttons
             let by = 350;
 
-            // Equip
+            // Equip with comparison
             if (['weapon', 'armor', 'accessory', 'tool'].includes(item.category)) {
+                const slot = item.category === 'weapon' ? 'weapon' :
+                             item.category === 'armor' ? 'armor' :
+                             item.category === 'accessory' ? 'accessory' : 'tool';
+                const current = inv.equipment[slot];
+
+                // Show stat comparison
+                if (item.stats && current && current.stats) {
+                    let compY = by;
+                    for (const [stat, val] of Object.entries(item.stats)) {
+                        const curVal = current.stats[stat] || 0;
+                        const diff = val - curVal;
+                        if (diff !== 0) {
+                            const color = diff > 0 ? '#44ff44' : '#ff4444';
+                            const sign = diff > 0 ? '+' : '';
+                            const label = stat.replace(/([A-Z])/g, ' $1').trim();
+                            r.text(`${label}: ${sign}${typeof diff === 'number' && Math.abs(diff) < 1 ? Math.round(diff * 100) + '%' : diff}`, 1030, compY, color, 10);
+                            compY += 14;
+                        }
+                    }
+                } else if (item.stats && !current) {
+                    r.text('No current equipment', 1030, by, '#888', 9);
+                }
+
                 const eqHover = inp.isOver(850, by, 160, 35);
                 r.button(850, by, 160, 35, '⚔ Equip', eqHover);
                 if (inp.clickedIn(850, by, 160, 35)) {
