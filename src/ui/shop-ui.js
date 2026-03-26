@@ -336,7 +336,12 @@ class ShopUI {
             const vsYesterday = Math.round((shop.dailyEarnings / yesterday - 1) * 100);
             r.text(vsYesterday >= 0 ? `▲${vsYesterday}%` : `▼${Math.abs(vsYesterday)}%`, 200, 667, vsYesterday >= 0 ? '#44ff44' : '#ff4444', 9);
         }
-        r.text(`Total Sales: ${shop.totalSales}`, 25, 685, '#aaa', 11);
+        // Sales counter with flash
+        if (!ShopUI._lastSales) ShopUI._lastSales = shop.totalSales;
+        if (shop.totalSales !== ShopUI._lastSales) { ShopUI._salesFlash = 30; ShopUI._lastSales = shop.totalSales; }
+        const salesColor = ShopUI._salesFlash > 0 ? '#44ff44' : '#aaa';
+        if (ShopUI._salesFlash > 0) ShopUI._salesFlash--;
+        r.text(`Total Sales: ${shop.totalSales}`, 25, 685, salesColor, 11);
         r.text(`Total Earnings: ${Utils.formatGold(shop.totalEarnings)}g`, 25, 705, '#aaa', 11);
         r.text(`Tax Rate: ${Math.round(game.economy.getEffectiveTaxRate(bonuses) * 100)}%`, 25, 725, '#ff8888', 11);
 
