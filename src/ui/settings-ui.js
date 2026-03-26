@@ -150,9 +150,13 @@ class SettingsUI {
         sy += 16;
         r.text(`Sales: ${stats.totalSales} | Crafts: ${stats.totalCrafts} | Bosses: ${stats.bossesDefeated}`, px + 30, sy, '#888', 10);
         sy += 16;
-        r.text(`Achievements: ${game.achievements.getUnlockedCount()}/${game.achievements.getTotalCount()}`, px + 30, sy, '#ffd700', 10);
+        r.text(`Achievements: ${game.achievements.getUnlockedCount()}/${game.achievements.getTotalCount()} | Milestones: ${game.milestones.claimed.size}`, px + 30, sy, '#ffd700', 10);
         sy += 16;
-        r.text(`Endless Best: F${game.endless.highestFloor} | Chests: ${game.mystery.totalOpened}`, px + 30, sy, '#888', 10);
+        r.text(`Endless: F${game.endless.highestFloor} (${game.endless.totalRuns} runs) | Chests: ${game.mystery.totalOpened}`, px + 30, sy, '#888', 10);
+        sy += 16;
+        r.text(`Bank Interest: ${Utils.formatGold(game.bank.totalInterestEarned)}g | Trade Profit: ${Utils.formatGold(game.tradeRoutes.totalProfit)}g`, px + 30, sy, '#888', 10);
+        sy += 16;
+        r.text(`Enhancements: ${game.enhance.totalEnhancements} | Fusions: ${game.fusion.totalFusions} | Prestige: ${game.prestigeLevel || 0}`, px + 30, sy, '#888', 10);
 
         // Close button
         const closeHover = inp.isOver(px + pw - 35, py + 5, 30, 25);
