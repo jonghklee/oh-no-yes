@@ -359,6 +359,11 @@ class ExploreUI {
             game.notify('Used Health Potion! Ready for more!', '#44ff44');
         }
 
+        // Area stats display
+        const areaEnemies = area.enemies.filter(e => game.codex.discoveredEnemies.has(e));
+        const areaItems = area.gatherables.filter(g => game.codex.discoveredItems.has(g.item));
+        r.text(`${area.icon} Discovered: ${areaEnemies.length}/${area.enemies.length} enemies, ${areaItems.length}/${area.gatherables.length} items`, 20, 710, '#888', 9);
+
         // Gathered items panel
         r.panel(620, 115, 570, 640, '💎 Gathered Items');
         const gathered = {};

@@ -48,6 +48,12 @@ class CombatUI {
             r.text('👑 BOSS', ex, ey - 25, '#ffd700', 12, 'center');
         }
 
+        // Kill count from codex
+        const killCount = game.codex.defeatedCounts[combat.enemy.id] || 0;
+        if (killCount > 0) {
+            r.text(`Defeated: ${killCount}x`, ex, ey + 103, '#888', 8, 'center');
+        }
+
         // Elemental type indicator
         const elemIcons = { fire: '🔥', ice: '❄', nature: '🌿', dark: '🌑', physical: '⚔' };
         const elemColors = { fire: '#ff4400', ice: '#44aaff', nature: '#44ff44', dark: '#aa44ff', physical: '#aaaaaa' };
