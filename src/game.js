@@ -31,6 +31,7 @@ class Game {
         this.challengeMode = new ChallengeModeSystem();
         this.statsTracker = new StatsTracker();
         this.loginRewards = new LoginRewardSystem();
+        this.enhance = new EnhanceSystem();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -758,7 +759,8 @@ class Game {
             marketOrders: this.marketOrders.serialize(),
             challengeMode: this.challengeMode.serialize(),
             statsTracker: this.statsTracker.serialize(),
-            loginRewards: this.loginRewards.serialize()
+            loginRewards: this.loginRewards.serialize(),
+            enhance: this.enhance.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -806,6 +808,7 @@ class Game {
         if (data.challengeMode) this.challengeMode.deserialize(data.challengeMode);
         if (data.statsTracker) this.statsTracker.deserialize(data.statsTracker);
         if (data.loginRewards) this.loginRewards.deserialize(data.loginRewards);
+        if (data.enhance) this.enhance.deserialize(data.enhance);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';
@@ -876,14 +879,28 @@ class Game {
         this.audio.init();
         this.audio.startMusic('shop');
 
-        // Apply prestige bonuses
+        // Apply prestige bonuses with special unlocks
         if (this.prestigeLevel > 0) {
-            this.gold += this.prestigeLevel * 500;
-            this.baseStats.maxHp += this.prestigeLevel * 10;
-            this.baseStats.atk += this.prestigeLevel * 2;
-            this.baseStats.def += this.prestigeLevel * 2;
-            this.skills.addPoints(this.prestigeLevel * 2);
-            this.notify(`New Game+ ${this.prestigeLevel}! Prestige bonuses applied!`, '#ff44ff', 5000);
+            const p = this.prestigeLevel;
+            this.gold += p * 500;
+            this.baseStats.maxHp += p * 10;
+            this.baseStats.maxMp += p * 5;
+            this.baseStats.atk += p * 2;
+            this.baseStats.def += p * 2;
+            this.baseStats.speed += Math.floor(p / 2);
+            this.skills.addPoints(p * 2);
+
+            // Prestige-specific unlocks
+            const unlocks = [];
+            if (p >= 1) { this.exploration.maxStamina += 10; unlocks.push('+10 Max Stamina'); }
+            if (p >= 2) { this.shop.maxDisplay += 4; unlocks.push('+4 Display Slots'); }
+            if (p >= 3) { this.tradeRoutes.maxActiveCaravans++; unlocks.push('+1 Max Caravan'); }
+            if (p >= 4) { this.bank.interestRate += 0.005; unlocks.push('+0.5% Bank Rate'); }
+            if (p >= 5) { this.baseStats.critRate += 0.03; unlocks.push('+3% Crit Rate'); }
+            if (p >= 7) { this.baseStats.lifesteal += 0.02; unlocks.push('+2% Lifesteal'); }
+            if (p >= 10) { this.baseStats.dodge += 0.05; unlocks.push('+5% Dodge'); }
+
+            this.notify(`New Game+ ${p}! ${unlocks.join(', ')}`, '#ff44ff', 6000);
         } else {
             // Welcome dialog for new players
             setTimeout(() => {

@@ -197,8 +197,13 @@ class InventoryUI {
                 }
             }
 
+            // Enhancement level
+            if (item.enhanceLevel) {
+                r.textBold(`Enhancement: +${item.enhanceLevel}`, 850, 315, '#ff88ff', 11);
+            }
+
             const sellPrice = game.economy.getSellPrice(item.id, item.quality || 1.0, bonuses);
-            r.text(`Sell Value: ${sellPrice}g`, 850, 320, '#ffd700', 12);
+            r.text(`Sell Value: ${sellPrice}g`, 850, 332, '#ffd700', 12);
 
             // Action buttons
             let by = 350;
@@ -228,12 +233,36 @@ class InventoryUI {
                     r.text('No current equipment', 1030, by, '#888', 9);
                 }
 
-                const eqHover = inp.isOver(850, by, 160, 35);
-                r.button(850, by, 160, 35, '⚔ Equip', eqHover);
-                if (inp.clickedIn(850, by, 160, 35)) {
+                const eqHover = inp.isOver(850, by, 80, 35);
+                r.button(850, by, 80, 35, '⚔ Equip', eqHover);
+                if (inp.clickedIn(850, by, 80, 35)) {
                     inv.equip(item.id);
                     game.audio.click();
                     game.notify(`Equipped ${item.name}!`, '#44ff44');
+                }
+
+                // Enhance button
+                if (game.enhance.canEnhance(item)) {
+                    const cost = game.enhance.getEnhanceCost(item);
+                    const enhHover = inp.isOver(940, by, 80, 35);
+                    r.button(940, by, 80, 35, `⬆ +${(item.enhanceLevel||0)+1}`, enhHover, false, '#4a3060');
+                    r.text(`${cost.gold}g ${cost.materialQty}x${ItemDB[cost.material]?.icon||'?'}`, 1030, by + 8, '#aaa', 8);
+                    r.text(`${Math.round(cost.successRate*100)}%`, 1030, by + 20, cost.successRate >= 0.7 ? '#88ff88' : '#ff8888', 8);
+                    if (inp.clickedIn(940, by, 80, 35)) {
+                        const result = game.enhance.enhance(item, inv, game.gold);
+                        if (result.success) {
+                            game.spendGold(result.cost);
+                            game.audio.levelUp();
+                            game.particles.burst(1000, by + 15, 12, '#ff88ff', 3);
+                            game.notify(`✨ ${result.message}`, '#ff88ff');
+                        } else if (result.error) {
+                            game.notify(result.error, '#ff4444');
+                        } else {
+                            game.spendGold(result.cost);
+                            game.notify(`💔 ${result.message}`, '#ff4444');
+                            game.audio.error();
+                        }
+                    }
                 }
                 by += 42;
             }
