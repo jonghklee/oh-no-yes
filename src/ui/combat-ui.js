@@ -110,8 +110,14 @@ class CombatUI {
                     game.audio[result.isCrit ? 'crit' : 'hit']();
                     game.particles.damage(ex, ey + 30, result.damage, result.isCrit);
                     r.shake(result.isCrit ? 300 : 150);
+                    if (result.isCrit) {
+                        r.flash('#ff4444', 150); // Red flash on crit
+                        game.particles.burst(ex, ey + 30, 8, '#ff4444', 3);
+                    }
                     if (result.type === 'victory') {
                         game.audio.victory();
+                        r.flash('#ffd700', 300); // Gold flash on victory
+                        game.particles.levelUpEffect(ex, ey);
                     }
                 }
             }
@@ -196,26 +202,40 @@ class CombatUI {
 
         // === VICTORY / DEFEAT ===
         if (combat.state === 'victory') {
-            r.setAlpha(0.7);
-            r.fillRect(0, 250, 1200, 200, '#000');
+            // Animated victory banner
+            const victoryPulse = Math.sin(Date.now() / 200) * 0.1 + 0.9;
+            r.setAlpha(0.75);
+            r.fillRect(0, 240, 1200, 220, '#000');
             r.resetAlpha();
-            r.textBold('⚔ VICTORY! ⚔', 600, 290, '#ffd700', 36, 'center');
 
-            const rewards = combat.combat?.getRewards ? null : null; // preview
+            r.setAlpha(victoryPulse);
+            r.textBold('⚔ VICTORY! ⚔', 600, 280, '#ffd700', 42, 'center');
+            r.resetAlpha();
 
-            const collectHover = inp.isOver(500, 380, 200, 45);
-            r.button(500, 380, 200, 45, '💰 Collect Rewards', collectHover);
-            if (inp.clickedIn(500, 380, 200, 45)) {
+            // Show enemy name
+            r.text(`${combat.enemy.name} defeated!`, 600, 330, '#aaa', 14, 'center');
+
+            // Reward preview
+            const enemy = combat.enemy;
+            const goldPreview = `~${Utils.random(enemy.gold[0], enemy.gold[1])}g`;
+            r.text(`🪙 ${goldPreview}  ⭐ ${enemy.xp} XP`, 600, 355, '#ffd700', 12, 'center');
+
+            const collectHover = inp.isOver(500, 390, 200, 45);
+            r.button(500, 390, 200, 45, '💰 Collect Rewards', collectHover);
+            if (inp.clickedIn(500, 390, 200, 45)) {
                 game.collectCombatRewards();
                 game.audio.coin();
             }
         }
 
         if (combat.state === 'defeat') {
-            r.setAlpha(0.7);
-            r.fillRect(0, 250, 1200, 200, '#000');
+            r.setAlpha(0.75);
+            r.fillRect(0, 240, 1200, 220, '#000');
             r.resetAlpha();
-            r.textBold('💀 DEFEATED 💀', 600, 290, '#ff4444', 36, 'center');
+            const defeatPulse = Math.sin(Date.now() / 300) * 0.1 + 0.9;
+            r.setAlpha(defeatPulse);
+            r.textBold('💀 DEFEATED 💀', 600, 280, '#ff4444', 42, 'center');
+            r.resetAlpha();
             r.text('You lost 10% of your gold...', 600, 340, '#ff8888', 14, 'center');
 
             const retHover = inp.isOver(500, 380, 200, 45);

@@ -218,4 +218,33 @@ class Renderer {
     resetAlpha() {
         this.ctx.globalAlpha = 1;
     }
+
+    // Screen flash effect
+    flash(color = '#fff', duration = 200) {
+        this._flashColor = color;
+        this._flashTime = duration;
+        this._flashMax = duration;
+    }
+
+    renderFlash() {
+        if (this._flashTime > 0) {
+            const alpha = (this._flashTime / this._flashMax) * 0.4;
+            this.setAlpha(alpha);
+            this.fillRect(0, 0, this.width, this.height, this._flashColor);
+            this.resetAlpha();
+            this._flashTime -= 16;
+        }
+    }
+
+    // Vignette effect
+    vignette(intensity = 0.3) {
+        const grad = this.ctx.createRadialGradient(
+            this.width / 2, this.height / 2, this.width * 0.3,
+            this.width / 2, this.height / 2, this.width * 0.7
+        );
+        grad.addColorStop(0, 'transparent');
+        grad.addColorStop(1, `rgba(0,0,0,${intensity})`);
+        this.ctx.fillStyle = grad;
+        this.ctx.fillRect(0, 0, this.width, this.height);
+    }
 }

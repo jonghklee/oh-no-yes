@@ -43,6 +43,14 @@
             // Particles on top
             game.particles.render(game.renderer);
 
+            // Screen flash overlay
+            game.renderer.renderFlash();
+
+            // Combat vignette
+            if (game.screen === 'combat') {
+                game.renderer.vignette(0.25);
+            }
+
             // Tooltip
             if (game.tooltipItem) {
                 game.renderer.tooltip(game.input.mouseX + 15, game.input.mouseY + 15, game.tooltipItem);
