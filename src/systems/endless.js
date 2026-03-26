@@ -158,11 +158,19 @@ class EndlessDungeon {
             reward.items.push({ item: Utils.choice(rareDrops), qty: Utils.random(1, 3) });
         }
 
+        // Every 5 floors: mini bonus
+        if (this.floor % 5 === 0 && this.floor % 10 !== 0) {
+            reward.gold = Math.round(reward.gold * 1.5);
+            reward.xp = Math.round(reward.xp * 1.5);
+        }
+
         // Milestone rewards
         if (this.floor === 25) reward.items.push({ item: 'diamond', qty: 1 });
         if (this.floor === 50) reward.items.push({ item: 'mithril_ore', qty: 5 });
         if (this.floor === 75) reward.items.push({ item: 'phoenix_feather', qty: 1 });
         if (this.floor === 100) reward.items.push({ item: 'void_essence', qty: 10 });
+        if (this.floor === 150) reward.items.push({ item: 'phoenix_feather', qty: 3 });
+        if (this.floor === 200) reward.items.push({ item: 'void_essence', qty: 20 });
 
         this.rewards.push(reward);
         return reward;
