@@ -36,6 +36,18 @@ class CombatUI {
             r.text('👑 BOSS', ex, ey - 25, '#ffd700', 12, 'center');
         }
 
+        // Endless dungeon indicator
+        if (game.endless.active) {
+            r.roundRect(450, 55, 300, 25, 4, 'rgba(80,20,80,0.7)', '#ff44ff');
+            r.textBold(`🏰 Endless Dungeon - Floor ${game.endless.floor}`, 600, 59, '#ff44ff', 12, 'center');
+            r.text(`Best: F${game.endless.highestFloor} | Streak: ${game.endless.streak}`, 600, 82, '#aaa', 10, 'center');
+            // Active modifiers
+            if (game.endless.modifiers.length > 0) {
+                const modText = game.endless.modifiers.map(m => `${m.icon}${m.name}`).join(' ');
+                r.text(modText, 600, 96, '#ff8844', 9, 'center');
+            }
+        }
+
         // === PLAYER ===
         const px = 350 + (combat.playerShake > 0 ? Utils.random(-3, 3) : 0);
         const py = 320;
@@ -138,10 +150,18 @@ class CombatUI {
             const fleeHover = inp.isOver(570, 690, 170, 28);
             r.button(570, 690, 170, 28, '🏃 Flee', fleeHover, false, '#5a2020');
             if (inp.clickedIn(570, 690, 170, 28)) {
-                const bonuses = game.getSkillBonuses();
-                const fled = combat.playerFlee(bonuses.guaranteedEscape);
-                if (fled) {
-                    game.screen = game.exploration.active ? 'explore' : game.previousScreen;
+                if (game.endless.active) {
+                    // Leaving endless dungeon
+                    const result = game.endless.leave();
+                    game.combat.active = false;
+                    game.screen = 'explore';
+                    game.notify(`Escaped! Cleared ${result.floorsCleared} floors.`, '#ff44ff');
+                } else {
+                    const bonuses = game.getSkillBonuses();
+                    const fled = combat.playerFlee(bonuses.guaranteedEscape);
+                    if (fled) {
+                        game.screen = game.exploration.active ? 'explore' : game.previousScreen;
+                    }
                 }
                 game.audio.click();
             }

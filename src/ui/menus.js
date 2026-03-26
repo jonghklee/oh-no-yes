@@ -108,6 +108,28 @@ class ExploreUI {
                 game.notify('Fully rested!', '#44ddff');
             }
         }
+
+        // === ENDLESS DUNGEON ===
+        const canEndless = game.endless.canEnter(game.level);
+        if (canEndless) {
+            r.roundRect(700, 715, 300, 35, 6, 'rgba(80,20,80,0.7)', '#ff44ff', 2);
+            r.text('🏰', 715, 720, '#fff', 18);
+            r.textBold('Endless Dungeon', 745, 720, '#ff44ff', 14);
+            r.text(`Best: F${game.endless.highestFloor}`, 900, 723, '#aaa', 10);
+            const edHover = inp.isOver(700, 715, 300, 35);
+            if (edHover) {
+                r.roundRect(700, 715, 300, 35, 6, 'rgba(120,30,120,0.5)');
+            }
+            if (inp.clickedIn(700, 715, 300, 35)) {
+                const enemy = game.endless.enter();
+                game.combat.startBattle(game.getPlayerStats(), enemy);
+                game.switchScreen('combat');
+                game.notify('Entering Endless Dungeon! How far can you go?', '#ff44ff', 4000);
+                game.audio.discover();
+            }
+        } else if (game.level >= 5) {
+            r.text('🏰 Endless Dungeon unlocks at Lv.10', 700, 725, '#555', 11);
+        }
     }
 
     static renderExploration(game) {

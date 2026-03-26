@@ -18,6 +18,7 @@ class Game {
         this.skills = new SkillSystem();
         this.reputation = new ReputationSystem();
         this.quests = new QuestSystem();
+        this.endless = new EndlessDungeon();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -245,17 +246,53 @@ class Game {
         for (const qid of completed) {
             this.notify(`Quest complete: ${QuestDB[qid]?.name}!`, '#ffd700');
         }
+
+        // Check achievements (every 2 seconds to save performance)
+        this._achTimer = (this._achTimer || 0) + dt;
+        if (this._achTimer > 2000) {
+            this._achTimer = 0;
+            const achState = {
+                totalSales: this.shop.totalSales,
+                totalGoldEarned: this.totalGold,
+                totalCrafts: this.crafting.totalCrafts,
+                playerLevel: this.level,
+                day: this.day,
+                prestigeLevel: this.prestigeLevel || 0,
+                allStationsUnlocked: Object.values(this.crafting.unlockedStations).every(v => v),
+                allAreasVisited: this.exploration.areasVisited.size >= 9,
+                defeatedBosses: [...this.exploration.bossesDefeated],
+                uniqueItemsOwned: Object.keys(this.inventory.items).length,
+                maxCraftingLevel: this.crafting.level >= 25
+            };
+            const newAch = this.achievements.checkAll(achState);
+            for (const ach of newAch) {
+                this.notify(`🏆 Achievement: ${ach.name}!`, '#ffd700', 5000);
+                this.audio.victory();
+                // Apply rewards
+                if (ach.reward) {
+                    if (ach.reward.gold) this.addGold(ach.reward.gold);
+                    if (ach.reward.xp) this.addXp(ach.reward.xp);
+                    if (ach.reward.skillPoints) this.skills.addPoints(ach.reward.skillPoints);
+                }
+            }
+        }
     }
 
     handleCombatResult(result) {
         if (result.playerDefeated) {
             this.audio.defeat();
-            this.exploration.onCombatDefeat();
-            // Lose some gold
-            const lost = Math.round(this.gold * 0.1);
-            this.gold -= lost;
-            this.notify(`Defeated! Lost ${lost}g`, '#ff4444');
-            setTimeout(() => { this.screen = this.previousScreen; }, 2000);
+            if (this.endless.active) {
+                const endResult = this.endless.onDefeat();
+                this.notify(`Endless Dungeon: Cleared ${endResult.floorsCleared} floors!`, '#ff44ff');
+                if (endResult.isNewRecord) this.notify('New record!', '#ffd700');
+                setTimeout(() => { this.screen = 'explore'; }, 2000);
+            } else {
+                this.exploration.onCombatDefeat();
+                const lost = Math.round(this.gold * 0.1);
+                this.gold -= lost;
+                this.notify(`Defeated! Lost ${lost}g`, '#ff4444');
+                setTimeout(() => { this.screen = this.previousScreen; }, 2000);
+            }
         }
     }
 
@@ -291,8 +328,21 @@ class Game {
             this.audio.victory();
         }
 
-        // Return to exploration
-        if (this.exploration.active) {
+        // Return to exploration or endless dungeon
+        if (this.endless.active) {
+            // Endless dungeon: get floor reward and advance
+            const floorReward = this.endless.onVictory();
+            this.addGold(floorReward.gold);
+            this.addXp(floorReward.xp);
+            for (const item of floorReward.items) {
+                this.inventory.addItem(item.item, item.qty);
+            }
+            // Start next floor
+            const nextEnemy = this.endless.nextFloor();
+            this.combat.startBattle(this.getPlayerStats(), nextEnemy);
+            // Stay in combat screen
+            this.notify(`Floor ${this.endless.floor - 1} cleared! +${floorReward.gold}g`, '#ff44ff');
+        } else if (this.exploration.active) {
             this.exploration.onCombatVictory(this.combat.enemy?.id);
             this.screen = 'explore';
         } else {
@@ -347,7 +397,9 @@ class Game {
             reputation: this.reputation.serialize(),
             quests: this.quests.serialize(),
             enchantment: this.enchantment.serialize(),
-            prestige: this.prestige.serialize()
+            prestige: this.prestige.serialize(),
+            endless: this.endless.serialize(),
+            achievements: this.achievements.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -378,6 +430,8 @@ class Game {
         if (data.quests) this.quests.deserialize(data.quests);
         if (data.enchantment) this.enchantment.deserialize(data.enchantment);
         if (data.prestige) this.prestige.deserialize(data.prestige);
+        if (data.endless) this.endless.deserialize(data.endless);
+        if (data.achievements) this.achievements.deserialize(data.achievements);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';
