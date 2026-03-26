@@ -133,8 +133,13 @@ class Renderer {
         this.ctx.stroke();
     }
 
-    // Panel with title
+    // Panel with title and shadow
     panel(x, y, w, h, title, bgColor = 'rgba(20,10,40,0.9)', borderColor = '#3d1e6d') {
+        // Subtle drop shadow
+        this.ctx.globalAlpha = 0.15;
+        this.roundRect(x + 3, y + 3, w, h, 8, '#000');
+        this.ctx.globalAlpha = 1;
+        // Main panel
         this.roundRect(x, y, w, h, 8, bgColor, borderColor, 2);
         if (title) {
             this.gradientRect(x + 2, y + 2, w - 4, 28, '#3d1e6d', 'rgba(61,30,109,0.3)');

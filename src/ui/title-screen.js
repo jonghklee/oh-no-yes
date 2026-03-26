@@ -18,12 +18,24 @@ class TitleScreen {
             r.resetAlpha();
         }
 
-        // Title
+        // Title with glow effect
         const titleY = 200 + Math.sin(time * 1.5) * 8;
+
+        // Title glow
+        const glowSize = Math.sin(time * 2) * 5 + 15;
+        r.setAlpha(0.08);
+        r.circle(600, titleY + 25, glowSize + 60, '#ffd700');
+        r.resetAlpha();
+
+        // Title shadow
+        r.textBold('Oh No Yes!', 602, titleY + 2, '#000', 56, 'center');
+        // Main title
         r.textBold('Oh No Yes!', 600, titleY, '#ffd700', 56, 'center');
+
+        // Subtitle with shimmer
         r.text('Merchant Adventure RPG', 600, titleY + 60, '#b090d0', 22, 'center');
 
-        // Subtitle with animation
+        // Tagline with animation
         const subAlpha = Math.sin(time * 2) * 0.3 + 0.7;
         r.setAlpha(subAlpha);
         r.text('Build your empire. Explore the world. Craft legendary items.', 600, titleY + 95, '#8070a0', 14, 'center');
