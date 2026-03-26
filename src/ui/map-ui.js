@@ -168,7 +168,49 @@ class MapUI {
                 }
             }
         } else {
-            r.text('Select an item to view details', 990, 400, '#666', 13, 'center');
+            r.text('Select an item to view details', 990, 300, '#666', 13, 'center');
+
+            // Today's Best Deals
+            r.textBold("💡 Today's Best Deals", 810, 340, '#ffd700', 12);
+
+            // Find items with biggest upward trends (sell high)
+            const trendItems = Object.entries(economy.trends)
+                .filter(([id, t]) => t > 0.05 && game.inventory.hasItem(id, 1))
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+
+            if (trendItems.length > 0) {
+                r.text('📈 Sell Now (rising prices):', 810, 360, '#44ff44', 10);
+                trendItems.forEach(([id, trend], i) => {
+                    const item = ItemDB[id];
+                    if (item) {
+                        const price = economy.getSellPrice(id, 1.0, bonuses);
+                        r.text(`${item.icon} ${item.name}: ${price}g`, 825, 376 + i * 16, '#88ff88', 9);
+                    }
+                });
+            }
+
+            // Find items with biggest downward trends (buy low)
+            const buyItems = Object.entries(economy.trends)
+                .filter(([id, t]) => t < -0.05)
+                .sort((a, b) => a[1] - b[1])
+                .slice(0, 3);
+
+            const buyY = 376 + trendItems.length * 16 + 10;
+            if (buyItems.length > 0) {
+                r.text('📉 Good Buys (low prices):', 810, buyY, '#ff8888', 10);
+                buyItems.forEach(([id, trend], i) => {
+                    const item = ItemDB[id];
+                    if (item) {
+                        const price = economy.getBuyPrice(id, 1.0, bonuses);
+                        r.text(`${item.icon} ${item.name}: ${price}g`, 825, buyY + 16 + i * 16, '#ffaaaa', 9);
+                    }
+                });
+            }
+
+            if (trendItems.length === 0 && buyItems.length === 0) {
+                r.text('Market is stable today.', 810, 370, '#888', 10);
+            }
         }
 
         // === BANK SECTION (bottom of right panel) ===
