@@ -23,6 +23,7 @@ class Game {
         this.codex = new Codex();
         this.mystery = new MysteryChestSystem();
         this.tradeRoutes = new TradeRouteSystem();
+        this.bank = new BankSystem();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -159,6 +160,23 @@ class Game {
         this.economy.updatePrices(this.day);
         this.shop.newDay();
         this.exploration.newDay();
+
+        // Bank interest processing
+        this.bank.updateMaxDeposit(this.reputation.reputation);
+        const bankResults = this.bank.processDailyInterest();
+        for (const br of bankResults) {
+            if (br.type === 'interest' && br.amount > 0) {
+                this.notify(`🏦 Bank interest: +${br.amount}g (total: ${br.total}g)`, '#44ddff');
+            }
+            if (br.type === 'loanInterest') {
+                if (br.daysLeft <= 5) {
+                    this.notify(`⚠ Loan due in ${br.daysLeft} days! (${br.remaining}g)`, '#ff4444');
+                }
+            }
+            if (br.type === 'forcedRepayment') {
+                this.notify(`🏦 Loan forcibly collected: -${br.amount}g from deposits`, '#ff4444');
+            }
+        }
 
         // Check trade route returns
         const returns = this.tradeRoutes.checkReturns(this.day);
@@ -527,7 +545,8 @@ class Game {
             daily: this.daily.serialize(),
             codex: this.codex.serialize(),
             mystery: this.mystery.serialize(),
-            tradeRoutes: this.tradeRoutes.serialize()
+            tradeRoutes: this.tradeRoutes.serialize(),
+            bank: this.bank.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -565,6 +584,7 @@ class Game {
         if (data.codex) this.codex.deserialize(data.codex);
         if (data.mystery) this.mystery.deserialize(data.mystery);
         if (data.tradeRoutes) this.tradeRoutes.deserialize(data.tradeRoutes);
+        if (data.bank) this.bank.deserialize(data.bank);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';

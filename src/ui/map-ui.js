@@ -170,5 +170,56 @@ class MapUI {
         } else {
             r.text('Select an item to view details', 990, 400, '#666', 13, 'center');
         }
+
+        // === BANK SECTION (bottom of right panel) ===
+        r.panel(790, 620, 400, 130, '🏦 Bank');
+        const bank = game.bank;
+
+        r.text(`Deposits: ${Utils.formatGold(bank.deposits)}g / ${Utils.formatGold(bank.maxDeposit)}g`, 810, 650, '#44ddff', 11);
+        r.text(`Interest Rate: ${Math.round(bank.interestRate * 100)}% daily`, 810, 668, '#aaa', 10);
+        r.text(`Earned: ${Utils.formatGold(bank.totalInterestEarned)}g total`, 810, 683, '#ffd700', 10);
+
+        if (bank.accumulatedInterest > 0) {
+            const collectHover = inp.isOver(1030, 648, 140, 22);
+            r.button(1030, 648, 140, 22, `💰 Collect ${bank.accumulatedInterest}g`, collectHover);
+            if (inp.clickedIn(1030, 648, 140, 22)) {
+                const amt = bank.collectInterest();
+                game.addGold(amt);
+                game.audio.coin();
+                game.notify(`Collected ${amt}g interest!`, '#44ddff');
+            }
+        }
+
+        // Deposit / Withdraw buttons
+        const depAmounts = [100, 500, 1000];
+        depAmounts.forEach((amt, i) => {
+            const dx = 810 + i * 65;
+            // Deposit
+            const depHover = inp.isOver(dx, 700, 60, 20);
+            r.button(dx, 700, 60, 20, `+${amt}`, depHover, game.gold < amt || bank.deposits + amt > bank.maxDeposit, '#2a4a2a');
+            if (game.gold >= amt && bank.deposits + amt <= bank.maxDeposit && inp.clickedIn(dx, 700, 20, 20)) {
+                const result = bank.deposit(amt, game.gold);
+                if (result.success) { game.spendGold(amt); game.audio.coin(); }
+            }
+            // Withdraw
+            const wdx = dx + 130;
+            const wdHover = inp.isOver(wdx, 700, 60, 20);
+            r.button(wdx, 700, 60, 20, `-${amt}`, wdHover, bank.deposits < amt, '#4a2a2a');
+            if (bank.deposits >= amt && inp.clickedIn(wdx, 700, 60, 20)) {
+                const result = bank.withdraw(amt);
+                if (result.success) { game.addGold(amt); game.audio.coin(); }
+            }
+        });
+
+        // Loan info
+        if (bank.loans > 0) {
+            r.text(`⚠ Loan: ${Utils.formatGold(bank.loans)}g (${bank.loanDaysLeft}d left)`, 810, 728, '#ff8888', 10);
+            const repayHover = inp.isOver(1050, 726, 120, 18);
+            r.button(1050, 726, 120, 18, `Repay ${Math.min(bank.loans, game.gold)}g`, repayHover, game.gold <= 0, '#5a2a2a');
+            if (game.gold > 0 && inp.clickedIn(1050, 726, 120, 18)) {
+                const result = bank.repayLoan(game.gold, game.gold);
+                if (result.success) { game.spendGold(result.cost); game.notify(`Repaid ${result.cost}g`, '#44ff44'); }
+            }
+        }
     }
 }
