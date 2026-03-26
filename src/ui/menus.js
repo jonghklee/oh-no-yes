@@ -213,12 +213,24 @@ class ExploreUI {
             }
         }
 
-        // Leave
+        // Leave with summary
         const leaveHover = inp.isOver(30, 620, 200, 40);
         r.button(30, 620, 200, 40, '🚪 Leave', leaveHover, false, '#5a2020');
         if (inp.clickedIn(30, 620, 200, 40)) {
-            exploration.endExploration();
+            const results = exploration.endExploration();
+            const itemCount = results.items.length;
+            game.notify(`Exploration complete! Floor ${results.floorsExplored}, ${itemCount} items gathered.`, '#44ddff', 4000);
             game.audio.click();
+        }
+
+        // Quick actions
+        const restoreHover = inp.isOver(30, 668, 200, 30);
+        r.button(30, 668, 200, 30, `🧪 Use Potion (${game.inventory.getCount('health_potion')})`, restoreHover,
+            !game.inventory.hasItem('health_potion', 1), '#2a4a2a');
+        if (game.inventory.hasItem('health_potion', 1) && inp.clickedIn(30, 668, 200, 30)) {
+            game.inventory.removeItem('health_potion', 1);
+            game.audio.heal();
+            game.notify('Used Health Potion! Ready for more!', '#44ff44');
         }
 
         // Gathered items panel
@@ -505,36 +517,73 @@ class QuestUI {
             }
         });
 
-        // Game Statistics & Prestige
-        r.panel(900, 415, 290, 340, '📈 Statistics');
+        // Game Progress Dashboard
+        r.panel(900, 415, 290, 340, '📈 Progress Dashboard');
         const stats = game.getStats();
-        const statRows = [
-            { label: 'Days Played', value: stats.playDays, color: '#fff' },
-            { label: 'Total Gold Earned', value: Utils.formatGold(stats.totalGold), color: '#ffd700' },
-            { label: 'Total Sales', value: stats.totalSales, color: '#88ff88' },
-            { label: 'Items Crafted', value: stats.totalCrafts, color: '#4488ff' },
-            { label: 'Areas Explored', value: `${stats.areasExplored}/9`, color: '#44ddff' },
-            { label: 'Bosses Defeated', value: stats.bossesDefeated, color: '#ff4444' },
-            { label: 'Reputation', value: stats.reputation, color: '#ffaa44' },
-            { label: 'Prestige Level', value: stats.prestigeLevel, color: '#ff44ff' }
-        ];
 
-        statRows.forEach((row, i) => {
-            r.text(row.label + ':', 915, 450 + i * 20, '#888', 10);
-            r.textBold(row.value.toString(), 1150, 450 + i * 20, row.color, 11, 'right');
+        // Overall completion percentage
+        const completionFactors = [
+            { name: 'Areas', current: stats.areasExplored, max: 9 },
+            { name: 'Bosses', current: stats.bossesDefeated, max: 9 },
+            { name: 'Achievements', current: game.achievements.getUnlockedCount(), max: game.achievements.getTotalCount() },
+            { name: 'Milestones', current: game.milestones.claimed.size, max: 25 },
+            { name: 'Codex', current: game.codex.getDiscoveryPercent(), max: 100 },
+        ];
+        const overallPct = Math.round(completionFactors.reduce((sum, f) => sum + (f.current / f.max), 0) / completionFactors.length * 100);
+
+        r.textBold(`Overall: ${overallPct}%`, 915, 445, '#ffd700', 13);
+        r.progressBar(915, 463, 260, 12, overallPct, 100, '#ffd700', '#222');
+
+        // Individual progress bars
+        let py = 485;
+        completionFactors.forEach(f => {
+            const pct = Math.round(f.current / f.max * 100);
+            r.text(`${f.name}:`, 915, py, '#888', 9);
+            r.progressBar(980, py + 2, 130, 8, f.current, f.max, pct >= 100 ? '#44ff44' : '#4488ff', '#222');
+            r.text(`${f.current}/${f.max}`, 1120, py, '#aaa', 9, 'right');
+            py += 18;
         });
+
+        // Key stats
+        py += 5;
+        const keyStats = [
+            { label: 'Day', value: stats.playDays, color: '#fff' },
+            { label: 'Gold', value: Utils.formatGold(stats.totalGold), color: '#ffd700' },
+            { label: 'Sales', value: stats.totalSales, color: '#88ff88' },
+            { label: 'Endless', value: `F${game.endless.highestFloor}`, color: '#ff44ff' },
+            { label: 'Chests', value: game.mystery.totalOpened, color: '#44ddff' },
+            { label: 'Fusions', value: game.fusion.totalFusions, color: '#aa88ff' },
+        ];
+        keyStats.forEach((s, i) => {
+            const sx = 915 + (i % 2) * 140;
+            const sy = py + Math.floor(i / 2) * 16;
+            r.text(`${s.label}: `, sx, sy, '#666', 9);
+            r.text(s.value.toString(), sx + 50, sy, s.color, 9);
+        });
+
+        // Next goal suggestion
+        py += Math.ceil(keyStats.length / 2) * 16 + 10;
+        r.text('Next Goal:', 915, py, '#888', 10);
+        let nextGoal = 'Keep exploring!';
+        if (stats.areasExplored < 3) nextGoal = 'Explore more areas (need Lv.5+)';
+        else if (stats.bossesDefeated < 1) nextGoal = 'Defeat your first boss!';
+        else if (game.crafting.level < 5) nextGoal = 'Reach Crafting Lv.5';
+        else if (game.endless.highestFloor < 10) nextGoal = 'Reach Endless F10';
+        else if (stats.areasExplored < 9) nextGoal = 'Explore all 9 areas';
+        else if (game.endless.highestFloor < 50) nextGoal = 'Reach Endless F50';
+        else nextGoal = 'Prestige for New Game+!';
+        r.text(`→ ${nextGoal}`, 915, py + 14, '#ffaa44', 9);
 
         // New Game+ button
         if (game.canPrestige()) {
-            const ngHover = inp.isOver(920, 620, 250, 35);
-            r.button(920, 620, 250, 35, `⭐ New Game+ (Prestige ${(game.prestigeLevel || 0) + 1})`, ngHover, false, '#5a2080');
-            if (inp.clickedIn(920, 620, 250, 35)) {
+            const ngHover = inp.isOver(920, 720, 250, 28);
+            r.button(920, 720, 250, 28, `⭐ New Game+ (P${(game.prestigeLevel || 0) + 1})`, ngHover, false, '#5a2080');
+            if (inp.clickedIn(920, 720, 250, 28)) {
                 game.showDialog('Start New Game+? Keep 10% gold, gain permanent stat bonuses!', [
                     { label: 'Prestige!', action: () => { game.startPrestige(); game.dismissDialog(); } },
                     { label: 'Not yet', action: () => game.dismissDialog() }
                 ]);
             }
-            r.text('Keep 10% gold + permanent bonuses', 930, 660, '#aa88ff', 9);
         }
     }
 }
