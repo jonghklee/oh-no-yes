@@ -32,7 +32,9 @@ class ShopUI {
 
         // === LEFT PANEL: Display Items ===
         const shopPanelY = (game.luckySpin.canSpin(game.day) || game.luckySpin.spinning) ? 90 : 55;
-        r.panel(10, shopPanelY, 380, shopPanelY === 90 ? 305 : 340, '🏪 Shop Display');
+        const shopLevelColors = ['#3d1e6d','#3d1e6d','#4a2580','#5a3090','#6a3aa0','#7a44b0','#8a50c0','#9a5cd0','#aa68e0','#bb74f0','#cc80ff'];
+        const slColor = shopLevelColors[Math.min(shop.shopLevel, 10)] || '#3d1e6d';
+        r.panel(10, shopPanelY, 380, shopPanelY === 90 ? 305 : 340, `🏪 Shop Lv.${shop.shopLevel}`, 'rgba(20,10,40,0.9)', slColor);
 
         // Display slots
         for (let i = 0; i < shop.maxDisplay; i++) {

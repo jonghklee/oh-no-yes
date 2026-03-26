@@ -84,6 +84,17 @@ class ExploreUI {
 
             if (!unlocked) r.resetAlpha();
 
+            // Completion badge
+            const maxFloor2 = exploration.maxFloorReached[id] || 0;
+            const bossEnemy2 = area.enemies.find(e => EnemyDB[e]?.boss);
+            const bossDefeated = bossEnemy2 && exploration.bossesDefeated.has(bossEnemy2);
+            if (maxFloor2 >= area.floors && bossDefeated) {
+                r.text('✅ 100%', ax + cardW - 60, ay + 10, '#44ff44', 10);
+            } else if (maxFloor2 > 0) {
+                const pct = Math.round((maxFloor2 / area.floors) * 100);
+                r.text(`${pct}%`, ax + cardW - 40, ay + 12, '#888', 9);
+            }
+
             // Click to explore
             if (hovered && inp.clicked && canExplore.can) {
                 exploration.startExploration(id, game.level, bonuses);
