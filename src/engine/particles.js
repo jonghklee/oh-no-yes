@@ -6,6 +6,13 @@ class ParticleSystem {
     }
 
     emit(x, y, count, color, speed = 2, life = 30, size = 3) {
+        // Cap total particles to prevent memory issues in long sessions
+        if (this.particles.length > 200) {
+            this.particles.splice(0, this.particles.length - 150);
+        }
+        if (this.floatingTexts.length > 30) {
+            this.floatingTexts.splice(0, this.floatingTexts.length - 20);
+        }
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const spd = Utils.randomFloat(speed * 0.5, speed);
