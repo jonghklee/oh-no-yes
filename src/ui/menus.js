@@ -182,6 +182,24 @@ class ExploreUI {
         // Background based on area
         r.gradientRect(0, 50, 1200, 700, area.color + '44', '#1a0a2e');
 
+        // Atmospheric flavor text
+        const flavorTexts = {
+            whispering_woods: ['Leaves rustle in the wind...', 'Birds sing in the canopy above.', 'The scent of pine fills the air.'],
+            sunlit_meadow: ['Golden grass sways gently.', 'Butterflies dance in the light.', 'A warm breeze carries flower petals.'],
+            rocky_hills: ['Stones crunch underfoot.', 'The wind howls through the peaks.', 'An eagle circles overhead.'],
+            crystal_caves: ['Crystals hum with energy.', 'Light refracts in rainbow patterns.', 'The cave walls sparkle endlessly.'],
+            enchanted_glade: ['Magic tingles in the air.', 'Fireflies drift through the mist.', 'Ancient runes glow softly.'],
+            dwarven_mines: ['Pickaxes echo in the distance.', 'Ore veins glitter in the dark.', 'The smell of iron is everywhere.'],
+            haunted_ruins: ['Shadows shift at the edges.', 'A cold chill runs down your spine.', 'Whispers echo from nowhere.'],
+            dragon_peak: ['Heat radiates from below.', 'Smoke rises from fissures.', 'The ground trembles faintly.'],
+            void_depths: ['Reality bends around you.', 'Stars visible in the darkness.', 'Time feels... different here.']
+        };
+        const flavors = flavorTexts[area.id] || ['You explore the unknown...'];
+        const flavorIdx = Math.floor(Date.now() / 5000) % flavors.length;
+        r.setAlpha(0.5);
+        r.text(flavors[flavorIdx], 600, 108, '#aaa', 10, 'center');
+        r.resetAlpha();
+
         // Area header
         r.panel(10, 55, 1180, 50, null);
         r.text(`${area.icon} ${area.name} - Floor ${exploration.currentFloor}/${area.floors}`, 20, 70, '#fff', 16);
