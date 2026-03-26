@@ -91,6 +91,16 @@ class Game {
             matk: equipStats.matk || 0,
             mdef: (equipStats.mdef || 0) + (skillBonuses.mdef || 0)
         };
+
+        // Apply difficulty modifier
+        if (this.difficulty === 'easy') {
+            stats.maxHp = Math.round(stats.maxHp * 1.3);
+            stats.atk = Math.round(stats.atk * 1.2);
+        } else if (this.difficulty === 'hard') {
+            stats.maxHp = Math.round(stats.maxHp * 0.8);
+        }
+
+        return stats;
     }
 
     getSkillBonuses() {
@@ -921,6 +931,7 @@ class Game {
             prestigeLevel: this.prestigeLevel,
             playtimeMs: this.playtimeMs,
             sessions: this.sessions,
+            difficulty: this.difficulty || 'normal',
             inventory: this.inventory.serialize(),
             economy: this.economy.serialize(),
             crafting: this.crafting.serialize(),
@@ -968,6 +979,7 @@ class Game {
         this.prestigeLevel = data.prestigeLevel || 0;
         this.playtimeMs = data.playtimeMs || 0;
         this.sessions = (data.sessions || 0) + 1;
+        this.difficulty = data.difficulty || 'normal';
 
         if (data.inventory) this.inventory.deserialize(data.inventory);
         if (data.economy) this.economy.deserialize(data.economy);

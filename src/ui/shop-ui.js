@@ -51,6 +51,16 @@ class ShopUI {
                 const price = game.economy.getSellPrice(item.id, item.quality || 1.0, bonuses);
                 r.text(`${price}g`, sx + 40, sy + 62, '#ffd700', 10, 'center');
 
+                // Price trend arrow on displayed items
+                const trend = game.economy.getTrend(item.id);
+                r.text(trend.icon, sx + 72, sy + 4, trend.color, 8);
+
+                // Quantity badge
+                if (item.quantity > 1) {
+                    r.roundRect(sx + 58, sy + 2, 20, 14, 3, 'rgba(0,0,0,0.7)');
+                    r.text(`${item.quantity}`, sx + 68, sy + 3, '#fff', 9, 'center');
+                }
+
                 if (hovered) {
                     game.tooltipItem = item;
                 }

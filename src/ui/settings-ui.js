@@ -81,7 +81,28 @@ class SettingsUI {
                 game.audio.click();
             }
         });
-        sy += 40;
+        sy += 30;
+
+        // Difficulty
+        r.text('Difficulty:', px + 30, sy, '#aaa', 12);
+        const difficulties = [
+            { id: 'easy', label: 'Easy', color: '#44ff44' },
+            { id: 'normal', label: 'Normal', color: '#ffd700' },
+            { id: 'hard', label: 'Hard', color: '#ff4444' }
+        ];
+        if (!game.difficulty) game.difficulty = 'normal';
+        difficulties.forEach((d, i) => {
+            const bx = px + 180 + i * 70;
+            const active = game.difficulty === d.id;
+            const hov = inp.isOver(bx, sy - 2, 60, 22);
+            r.button(bx, sy - 2, 60, 22, d.label, hov, false, active ? '#2a5a2a' : '#3d1e6d');
+            if (inp.clickedIn(bx, sy - 2, 60, 22)) {
+                game.difficulty = d.id;
+                game.audio.click();
+                game.notify(`Difficulty set to ${d.label}`, d.color);
+            }
+        });
+        sy += 30;
 
         // === DATA ===
         r.textBold('Data', px + 20, sy, '#ddd', 14);
