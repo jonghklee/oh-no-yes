@@ -23,8 +23,8 @@ const CustomerDB = {
             enter: ["Need some supplies...", "Hope prices are fair today.", "Just need the basics."],
             haggle: ["That's a bit much for me...", "Can you go lower?", "I'm just a simple farmer..."],
             buy: ["Thank you kindly!", "This'll do nicely.", "Much appreciated!"],
-            leave: ["Maybe next time...", "I'll come back later.", "Too rich for my blood."],
-            happy: ["What a deal!", "You're the best merchant around!", "I'll tell my friends!"]
+            leave: ["Maybe next time...", "I'll come back later.", "Too rich for my blood.", "Perhaps another shop...", "My wallet says no."],
+            happy: ["What a deal!", "You're the best merchant around!", "I'll tell my friends!", "Worth every coin!", "My family will love this!"]
         }
     },
     merchant: {

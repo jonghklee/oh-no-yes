@@ -40,8 +40,17 @@ class EndlessDungeon {
         // Generate enemy for this floor
         this.currentEnemy = this.generateEnemy();
 
-        // Every 10 floors is a boss
-        if (this.floor % 10 === 0) {
+        // Every 10 floors is a boss, every 25 is a MEGA boss
+        if (this.floor % 25 === 0) {
+            this.currentEnemy.boss = true;
+            this.currentEnemy.megaBoss = true;
+            this.currentEnemy.name = `🔥 MEGA: ${this.getFloorTitle()} ${this.currentEnemy.name}`;
+            this.currentEnemy.hp = Math.round(this.currentEnemy.hp * 4);
+            this.currentEnemy.atk = Math.round(this.currentEnemy.atk * 2);
+            this.currentEnemy.def = Math.round(this.currentEnemy.def * 1.8);
+            this.currentEnemy.xp = Math.round(this.currentEnemy.xp * 10);
+            this.currentEnemy.gold = [this.currentEnemy.gold[0] * 8, this.currentEnemy.gold[1] * 8];
+        } else if (this.floor % 10 === 0) {
             this.currentEnemy.boss = true;
             this.currentEnemy.name = `${this.getFloorTitle()} ${this.currentEnemy.name}`;
             this.currentEnemy.hp = Math.round(this.currentEnemy.hp * 2);
@@ -132,8 +141,16 @@ class EndlessDungeon {
             reward.items.push({ item: drop, qty: 1 });
         }
 
+        // Mega boss floor bonus (every 25)
+        if (this.floor % 25 === 0) {
+            reward.gold *= 8;
+            reward.xp *= 5;
+            reward.items.push({ item: 'diamond', qty: Utils.random(2, 5) });
+            reward.items.push({ item: Utils.choice(['void_essence', 'phoenix_feather', 'mithril_ore']), qty: Utils.random(3, 8) });
+            reward.megaBoss = true;
+        }
         // Boss floor bonus
-        if (this.floor % 10 === 0) {
+        else if (this.floor % 10 === 0) {
             reward.gold *= 3;
             reward.xp *= 2;
             // Guaranteed rare+ drop
