@@ -539,8 +539,11 @@ class Game {
                     this.quests.updateProgress('craftCategory', { category: RecipeDB[result.itemId].category, count: 1 });
                 }
                 if (result.leveledUp) {
-                    this.notify(`Crafting level up! Level ${result.newLevel}`, '#ffd700');
+                    const craftBonus = result.newLevel * 50;
+                    this.addGold(craftBonus);
+                    this.notify(`🔨 Crafting level ${result.newLevel}! +${craftBonus}g bonus!`, '#ffd700');
                     this.particles.levelUpEffect(600, 400);
+                    this.audio.upgrade();
                 }
 
                 // Auto-stock crafted items to shop if enabled and item is sellable
@@ -736,7 +739,15 @@ class Game {
         }
         this.trackDaily('defeat', 1);
         this.challengeMode.addScore('kills', 1);
-        if (this.combat.enemy) this.codex.discoverEnemy(this.combat.enemy.id);
+        if (this.combat.enemy) {
+            const isNewDiscovery = !this.codex.discoveredEnemies.has(this.combat.enemy.id);
+            this.codex.discoverEnemy(this.combat.enemy.id);
+            if (isNewDiscovery) {
+                const bonusXp = 25 * this.level;
+                this.addXp(bonusXp);
+                this.notify(`📖 New Discovery: ${this.combat.enemy.icon} ${this.combat.enemy.name}! +${bonusXp} XP`, '#44ddff', 3000);
+            }
+        }
         this._dailyActivities = this._dailyActivities || new Set();
         this._dailyActivities.add('combat');
         this.checkSynergyBonus();

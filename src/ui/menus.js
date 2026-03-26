@@ -100,6 +100,15 @@ class ExploreUI {
                 exploration.startExploration(id, game.level, bonuses);
                 game.audio.discover();
                 game.quests.updateProgress('explore', { area: id, count: 1 });
+                // First visit bonus
+                if (exploration._firstVisitBonus) {
+                    exploration._firstVisitBonus = false;
+                    const bonus = 100 * area.difficulty;
+                    game.addGold(bonus);
+                    game.addXp(50 * area.difficulty);
+                    game.notify(`🗺 First visit to ${area.name}! +${bonus}g +XP!`, '#44ddff', 4000);
+                    game.particles.burst(600, 400, 12, '#44ddff', 3);
+                }
             }
         });
 

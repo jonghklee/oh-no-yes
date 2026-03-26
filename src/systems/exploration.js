@@ -41,7 +41,11 @@ class ExplorationSystem {
         this.gatheredItems = [];
         this.explorationLog = [];
         this.state = 'exploring';
+        const isFirstVisit = !this.areasVisited.has(areaId);
         this.areasVisited.add(areaId);
+        if (isFirstVisit) {
+            this._firstVisitBonus = true; // Flag for game.js to handle
+        }
 
         this.addLog(`Entering ${area.name} - Floor ${this.currentFloor}`);
         return { can: true, started: true };
