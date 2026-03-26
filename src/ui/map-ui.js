@@ -160,12 +160,23 @@ class MapUI {
 
             // Quick sell
             if (stock > 0) {
-                const sellHover = inp.isOver(810, 565, 150, 30);
+                const sellHover = inp.isOver(810, 565, 70, 26);
                 const sellPrice = economy.getSellPrice(MapUI.selectedItem, 1.0, bonuses);
-                r.button(810, 565, 150, 30, `Sell 1 (${sellPrice}g)`, sellHover);
-                if (inp.clickedIn(810, 565, 150, 30)) {
+                r.button(810, 565, 70, 26, `Sell ${sellPrice}g`, sellHover, false, '#5a5020');
+                if (inp.clickedIn(810, 565, 70, 26)) {
                     game.sellItem(MapUI.selectedItem);
                 }
+            }
+
+            // Buy button
+            const buyPrice = economy.getBuyPrice(MapUI.selectedItem, 1.0, bonuses);
+            const buyHover = inp.isOver(890, 565, 70, 26);
+            r.button(890, 565, 70, 26, `Buy ${buyPrice}g`, buyHover, game.gold < buyPrice, '#2a4a2a');
+            if (game.gold >= buyPrice && inp.clickedIn(890, 565, 70, 26)) {
+                game.spendGold(buyPrice);
+                game.inventory.addItem(MapUI.selectedItem, 1);
+                game.audio.buy();
+                game.notify(`Bought ${item.name} for ${buyPrice}g`, '#44ff44');
             }
         } else {
             r.text('Select an item to view details', 990, 300, '#666', 13, 'center');
@@ -255,6 +266,29 @@ class MapUI {
                 if (result.success) { game.addGold(amt); game.audio.coin(); }
             }
         });
+
+        // Deposit All / Withdraw All
+        const maxDepositable = Math.min(game.gold, bank.maxDeposit - bank.deposits);
+        if (maxDepositable > 0) {
+            const daHover = inp.isOver(810, 722, 85, 18);
+            r.button(810, 722, 85, 18, `+ALL (${Utils.formatGold(maxDepositable)})`, daHover, false, '#2a5a2a');
+            if (inp.clickedIn(810, 722, 85, 18)) {
+                bank.deposit(maxDepositable, game.gold);
+                game.spendGold(maxDepositable);
+                game.audio.coin();
+                game.notify(`Deposited ${Utils.formatGold(maxDepositable)}g!`, '#44ddff');
+            }
+        }
+        if (bank.deposits > 0) {
+            const waHover = inp.isOver(900, 722, 85, 18);
+            r.button(900, 722, 85, 18, `-ALL (${Utils.formatGold(bank.deposits)})`, waHover, false, '#5a2a2a');
+            if (inp.clickedIn(900, 722, 85, 18)) {
+                const amt = bank.deposits;
+                bank.withdraw(amt);
+                game.addGold(amt);
+                game.audio.coin();
+            }
+        }
 
         // Loan info
         if (bank.loans > 0) {
