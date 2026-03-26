@@ -168,16 +168,20 @@ class MapUI {
                 }
             }
 
-            // Buy button
+            // Buy buttons (x1, x5, x10)
             const buyPrice = economy.getBuyPrice(MapUI.selectedItem, 1.0, bonuses);
-            const buyHover = inp.isOver(890, 565, 70, 26);
-            r.button(890, 565, 70, 26, `Buy ${buyPrice}g`, buyHover, game.gold < buyPrice, '#2a4a2a');
-            if (game.gold >= buyPrice && inp.clickedIn(890, 565, 70, 26)) {
-                game.spendGold(buyPrice);
-                game.inventory.addItem(MapUI.selectedItem, 1);
-                game.audio.buy();
-                game.notify(`Bought ${item.name} for ${buyPrice}g`, '#44ff44');
-            }
+            [1, 5, 10].forEach((qty, bi) => {
+                const totalCost = buyPrice * qty;
+                const bx = 890 + bi * 75;
+                const bHover = inp.isOver(bx, 565, 68, 26);
+                r.button(bx, 565, 68, 26, `x${qty} ${Utils.formatGold(totalCost)}g`, bHover, game.gold < totalCost, '#2a4a2a');
+                if (game.gold >= totalCost && inp.clickedIn(bx, 565, 68, 26)) {
+                    game.spendGold(totalCost);
+                    game.inventory.addItem(MapUI.selectedItem, qty);
+                    game.audio.buy();
+                    game.notify(`Bought ${qty}x ${item.name} for ${totalCost}g`, '#44ff44');
+                }
+            });
         } else {
             r.text('Select an item to view details', 990, 300, '#666', 13, 'center');
 
