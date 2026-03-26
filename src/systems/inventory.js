@@ -96,7 +96,49 @@ class Inventory {
                 }
             }
         }
+
+        // Set bonuses - matching rarity across all slots
+        const setBonus = this.getSetBonus();
+        if (setBonus) {
+            for (const [stat, val] of Object.entries(setBonus.bonus)) {
+                if (stats[stat] !== undefined) stats[stat] += val;
+            }
+        }
+
         return stats;
+    }
+
+    getSetBonus() {
+        const equipped = Object.values(this.equipment).filter(e => e);
+        if (equipped.length < 2) return null;
+
+        // Check for matching rarity set
+        const rarities = equipped.map(e => e.rarity);
+        const allSame = rarities.every(r => r === rarities[0]);
+
+        if (allSame && equipped.length >= 3) {
+            const rarity = rarities[0];
+            const setBonuses = {
+                common: { name: 'Common Set', bonus: { def: 2, atk: 2 } },
+                uncommon: { name: 'Uncommon Set', bonus: { def: 5, atk: 5, hp: 10 } },
+                rare: { name: 'Rare Set', bonus: { def: 8, atk: 8, hp: 20, critRate: 0.05 } },
+                epic: { name: 'Epic Set', bonus: { def: 15, atk: 15, hp: 40, critRate: 0.1, lifesteal: 0.05 } },
+                legendary: { name: 'Legendary Set', bonus: { def: 25, atk: 25, hp: 80, critRate: 0.15, lifesteal: 0.1, dodge: 0.1 } }
+            };
+            return setBonuses[rarity] || null;
+        }
+
+        // Check for 2-piece matching
+        if (equipped.length >= 2) {
+            const rarityCount = {};
+            rarities.forEach(r => rarityCount[r] = (rarityCount[r] || 0) + 1);
+            const maxRarity = Object.entries(rarityCount).sort((a, b) => b[1] - a[1])[0];
+            if (maxRarity && maxRarity[1] >= 2) {
+                return { name: `${maxRarity[0]} x2`, bonus: { atk: 2, def: 2 } };
+            }
+        }
+
+        return null;
     }
 
     serialize() {

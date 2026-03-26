@@ -42,12 +42,44 @@ class ReputationSystem {
         return null;
     }
 
+    // Earned special titles from achievements
+    addEarnedTitle(title) {
+        if (!this.earnedTitles) this.earnedTitles = [];
+        if (!this.earnedTitles.includes(title)) {
+            this.earnedTitles.push(title);
+        }
+    }
+
+    getAvailableTitles() {
+        const titles = [this.title]; // current reputation title
+        if (this.earnedTitles) {
+            titles.push(...this.earnedTitles);
+        }
+        return titles;
+    }
+
+    setCustomTitle(title) {
+        if (this.getAvailableTitles().includes(title)) {
+            this.customTitle = title;
+        }
+    }
+
+    getDisplayTitle() {
+        return this.customTitle || this.title;
+    }
+
     serialize() {
-        return { reputation: this.reputation };
+        return {
+            reputation: this.reputation,
+            earnedTitles: this.earnedTitles || [],
+            customTitle: this.customTitle
+        };
     }
 
     deserialize(data) {
         this.reputation = data.reputation || 0;
+        this.earnedTitles = data.earnedTitles || [];
+        this.customTitle = data.customTitle;
         this.updateTitle();
     }
 }

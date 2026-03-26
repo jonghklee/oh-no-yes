@@ -34,7 +34,7 @@ class HUD {
         r.text(`⚡ ${game.exploration.stamina}/${game.exploration.maxStamina}`, 640, 14, '#44ddff', 12);
 
         // Reputation
-        r.text(`⭐ ${game.reputation.title}`, 750, 14, '#ffaa44', 12);
+        r.text(`⭐ ${game.reputation.getDisplayTitle()}`, 750, 14, '#ffaa44', 12);
 
         // Crafting level
         r.text(`🔨 Craft Lv.${game.crafting.level}`, 920, 14, '#4488ff', 11);

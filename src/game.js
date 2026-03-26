@@ -493,6 +493,12 @@ class Game {
                     this.notify(`🎯 Milestone: ${milestone.name}! ${reward.gold ? '+' + reward.gold + 'g ' : ''}${reward.skillPoints ? '+' + reward.skillPoints + ' SP' : ''}`, '#ff44ff', 5000);
                     this.audio.victory();
                     this.particles.burst(600, 400, 15, '#ff44ff', 4);
+                    // Earn title from special milestones
+                    const titleMilestones = { gold_1m: 'Millionaire', endless_100: 'Abyssal Champion', areas_all: 'World Explorer', level_30: 'Grandmaster' };
+                    if (titleMilestones[milestone.id]) {
+                        this.reputation.addEarnedTitle(titleMilestones[milestone.id]);
+                        this.notify(`🏅 Title earned: ${titleMilestones[milestone.id]}!`, '#ffd700', 4000);
+                    }
                 }
             }
         }

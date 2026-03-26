@@ -78,6 +78,12 @@ class InventoryUI {
             r.text(`Buy Discount: ${Math.round(bonuses.buyDiscount * 100)}%`, 25, 595, '#88ff88', 10);
         }
 
+        // Set bonus display
+        const setBonus = inv.getSetBonus();
+        if (setBonus) {
+            r.text(`🔗 ${setBonus.name}`, 25, 610, '#ff88ff', 10);
+        }
+
         // === Main Inventory ===
         r.panel(270, 55, 550, 700, `🎒 Inventory (${inv.getUsedSlots()}/${inv.maxSlots})`);
 
