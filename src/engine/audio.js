@@ -61,6 +61,11 @@ class AudioSystem {
     }
     coin() { this.play('triangle', 1200, 0.05, 0.2); this.play('triangle', 1500, 0.05, 0.15); }
     discover() { this.play('sine', 600, 0.15, 0.25); this.play('sine', 750, 0.15, 0.2); }
+    upgrade() { [440, 554, 659, 880].forEach((f,i) => setTimeout(() => this.play('sine', f, 0.15, 0.25), i*80)); }
+    questComplete() { [523, 659, 784, 1047, 1319].forEach((f,i) => setTimeout(() => this.play('triangle', f, 0.2, 0.25), i*100)); }
+    chestOpen() { this.play('triangle', 400, 0.1, 0.2); setTimeout(() => this.play('sine', 800, 0.15, 0.3), 100); }
+    fusion() { this.play('sawtooth', 300, 0.2, 0.2); setTimeout(() => this.play('sine', 900, 0.2, 0.3), 150); }
+    enhance() { this.play('square', 250, 0.1, 0.2); setTimeout(() => this.play('sine', 1000, 0.15, 0.25), 100); }
 
     // === AMBIENT MUSIC SYSTEM ===
     startMusic(mood = 'shop') {

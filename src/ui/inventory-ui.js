@@ -252,7 +252,7 @@ class InventoryUI {
                         const result = game.enhance.enhance(item, inv, game.gold);
                         if (result.success) {
                             game.spendGold(result.cost);
-                            game.audio.levelUp();
+                            game.audio.enhance();
                             game.particles.burst(1000, by + 15, 12, '#ff88ff', 3);
                             game.notify(`✨ ${result.message}`, '#ff88ff');
                         } else if (result.error) {
@@ -311,7 +311,7 @@ class InventoryUI {
                 if (inp.clickedIn(850, by, 160, 35)) {
                     const result = game.fusion.fuse(item.id, inv);
                     if (result.success) {
-                        game.audio.craft();
+                        game.audio.fusion();
                         game.particles.burst(1000, by + 15, 15, RarityColors[result.result.rarity] || '#fff', 3);
                         game.notify(`Fused! ${result.result.icon} ${result.result.name} (${result.result.rarity})`, RarityColors[result.result.rarity] || '#fff');
                         game.codex.discoverItem(result.result.id);

@@ -421,7 +421,7 @@ class ShopUI {
                     const result = shop.buyUpgrade(upg.id, game.gold);
                     if (result.success) {
                         game.spendGold(result.cost);
-                        game.audio.buy();
+                        game.audio.upgrade();
                         game.notify(`Upgraded ${upg.name}!`, '#44ff44');
                     }
                 }

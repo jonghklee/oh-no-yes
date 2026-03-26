@@ -12,11 +12,16 @@ body {
     min-height: 100vh;
     overflow: hidden;
     font-family: 'Segoe UI', sans-serif;
+    user-select: none;
 }
 
 canvas {
     border: 2px solid #3d1e6d;
     border-radius: 4px;
-    box-shadow: 0 0 30px rgba(100, 50, 200, 0.3);
-    image-rendering: pixelated;
+    box-shadow: 0 0 30px rgba(100, 50, 200, 0.3), 0 0 60px rgba(80, 30, 160, 0.15);
+    cursor: default;
+}
+
+canvas:active {
+    cursor: pointer;
 }
