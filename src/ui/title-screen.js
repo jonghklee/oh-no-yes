@@ -77,9 +77,14 @@ class TitleScreen {
                     const ptH = Math.floor(ptMin / 60);
                     const ptM = ptMin % 60;
                     const preview = `Lv.${saveData.level || 1} | Day ${saveData.day || 1} | ${Utils.formatGold(saveData.gold || 0)}g | ${ptH}h${ptM}m`;
-                    r.text(preview, 600, contBtnY + 38, '#6a9a6a', 11, 'center');
-                    if (saveData.prestigeLevel > 0) {
-                        r.text(`⭐ Prestige ${saveData.prestigeLevel}`, 600, contBtnY + 53, '#aa88ff', 9, 'center');
+                    r.text(preview, 600, contBtnY + 36, '#6a9a6a', 10, 'center');
+                    // Highlights
+                    const highlights = [];
+                    if (saveData.prestigeLevel > 0) highlights.push(`⭐P${saveData.prestigeLevel}`);
+                    if (saveData.endless?.highestFloor > 0) highlights.push(`🏰F${saveData.endless.highestFloor}`);
+                    if (saveData.shop?.totalSales > 0) highlights.push(`📈${saveData.shop.totalSales} sales`);
+                    if (highlights.length > 0) {
+                        r.text(highlights.join(' | '), 600, contBtnY + 52, '#aa88ff', 9, 'center');
                     }
                 }
             } catch(e) {}
