@@ -48,6 +48,18 @@ class CombatUI {
             r.text('👑 BOSS', ex, ey - 25, '#ffd700', 12, 'center');
         }
 
+        // Elemental type indicator
+        const elemIcons = { fire: '🔥', ice: '❄', nature: '🌿', dark: '🌑', physical: '⚔' };
+        const elemColors = { fire: '#ff4400', ice: '#44aaff', nature: '#44ff44', dark: '#aa44ff', physical: '#aaaaaa' };
+        if (combat.enemy.element) {
+            r.text(elemIcons[combat.enemy.element] || '', ex + 55, ey + 10, '#fff', 14);
+        }
+
+        // Combo counter
+        if (combat.combo > 1) {
+            r.textBold(`Combo x${combat.combo}`, px, py - 30, '#ff8844', 12, 'center');
+        }
+
         // Endless dungeon indicator
         if (game.endless.active) {
             r.roundRect(450, 55, 300, 25, 4, 'rgba(80,20,80,0.7)', '#ff44ff');

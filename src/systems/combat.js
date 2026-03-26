@@ -39,6 +39,10 @@ class CombatSystem {
         this.log = [];
         this.combo = 0;
         this.usedPotions = [];
+        // Assign elemental type to enemy based on area
+        const elements = ['fire', 'ice', 'nature', 'dark', 'physical'];
+        this.enemy.element = this.enemy.element || elements[Math.floor(this.enemy.name.length * 7 + this.enemy.atk) % elements.length];
+
         this.addLog(`A wild ${this.enemy.name} appears!`);
         return true;
     }
@@ -55,9 +59,12 @@ class CombatSystem {
             isCrit = true;
         }
 
-        // Combo bonus
+        // Combo bonus (escalating)
         this.combo++;
-        if (this.combo > 1) damage *= 1 + (this.combo - 1) * 0.05;
+        if (this.combo > 1) {
+            const comboMult = 1 + (this.combo - 1) * 0.08; // 8% per combo (was 5%)
+            damage *= comboMult;
+        }
 
         damage = Math.round(damage);
 
