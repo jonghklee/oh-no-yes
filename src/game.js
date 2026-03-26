@@ -239,13 +239,17 @@ class Game {
                 this.inventory.addItem(result.itemId, result.qty);
                 this.notify(`Crafted ${ItemDB[result.itemId]?.name || result.itemId} x${result.qty}!`, '#44aaff');
                 this.audio.craft();
+                this.particles.craftEffect(900, 400);
                 this.quests.updateProgress('craft', { count: 1 });
                 this.quests.updateProgress('totalCrafts', { count: this.crafting.totalCrafts });
+                this.trackDaily('craft', 1);
+                this.codex.discoverItem(result.itemId);
                 if (RecipeDB[result.itemId]) {
                     this.quests.updateProgress('craftCategory', { category: RecipeDB[result.itemId].category, count: 1 });
                 }
                 if (result.leveledUp) {
                     this.notify(`Crafting level up! Level ${result.newLevel}`, '#ffd700');
+                    this.particles.levelUpEffect(600, 400);
                 }
             }
         }

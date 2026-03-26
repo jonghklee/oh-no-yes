@@ -175,6 +175,12 @@ class ExploreUI {
                         game.codex.discoverItem(g.item);
                         game.trackDaily('gather', g.qty);
                     }
+                    // Auto-discover recipes from gathered materials
+                    const newRecipes = game.crafting.discoverByMaterials(game.inventory);
+                    if (newRecipes.length > 0) {
+                        const names = newRecipes.map(r => RecipeDB[r] ? ItemDB[RecipeDB[r].result]?.name : r).filter(Boolean);
+                        game.notify(`📖 New recipe${names.length > 1 ? 's' : ''}: ${names.join(', ')}!`, '#44aaff', 4000);
+                    }
                 } else if (result.type === 'event') {
                     ExploreUI.handleEvent(game, result.event);
                 }

@@ -165,6 +165,22 @@ class CraftingSystem {
         }
     }
 
+    // Discover recipes based on materials in inventory
+    discoverByMaterials(inventory) {
+        const newRecipes = [];
+        for (const [id, recipe] of Object.entries(RecipeDB)) {
+            if (this.discoveredRecipes.has(id)) continue;
+            if (!this.unlockedStations[recipe.station]) continue;
+            // If player has at least one of the ingredients, discover the recipe
+            const hasAny = recipe.ingredients.some(ing => inventory.hasItem(ing.item, 1));
+            if (hasAny && this.level >= Math.max(1, recipe.level - 3)) {
+                this.discoveredRecipes.add(id);
+                newRecipes.push(id);
+            }
+        }
+        return newRecipes;
+    }
+
     unlockStation(stationId, gold) {
         const station = CraftingStations[stationId];
         if (!station || this.unlockedStations[stationId]) return { success: false, reason: 'Already unlocked' };

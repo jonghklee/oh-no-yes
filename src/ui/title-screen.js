@@ -64,10 +64,31 @@ class TitleScreen {
         }
 
         // Version & credits
-        r.text('v1.0 - Made with ❤', 600, 700, '#444', 11, 'center');
+        r.text('v1.0 - Made with ❤', 600, 680, '#444', 11, 'center');
+
+        // Gameplay tips (rotate every 4 seconds)
+        const tips = [
+            '💡 Stock items in your shop display for customers to buy!',
+            '💡 Explore areas to gather crafting materials.',
+            '💡 Counter-offer in negotiations for better deals!',
+            '💡 Seasonal recipes give bonus yields - check the season!',
+            '💡 Trade routes provide passive income while you play.',
+            '💡 Mystery chests can contain jackpot rewards!',
+            '💡 Complete daily challenges for streak bonuses.',
+            '💡 Upgrade your shop to attract better customers.',
+            '💡 The Endless Dungeon unlocks at level 10.',
+            '💡 Use Power Strike (8 MP) for massive damage in combat!',
+            '💡 Bulk sell common materials from the inventory screen.',
+            '💡 Higher reputation attracts nobles and collectors.',
+            '💡 New Game+ keeps permanent stat bonuses!',
+            '💡 Press 1-7 to quickly switch between tabs.',
+            '💡 Check Market tab for price trends and best deals.',
+        ];
+        const tipIdx = Math.floor(time / 4000) % tips.length;
+        r.text(tips[tipIdx], 600, 710, '#555', 11, 'center');
 
         // Controls hint
-        r.text('Keys: 1-7 switch tabs | Space: pause | +/- speed', 600, 730, '#333', 10, 'center');
+        r.text('Keys: 1-7 switch tabs | Space: pause | ⚙ settings', 600, 735, '#333', 10, 'center');
 
         // Dialog overlay
         if (game.dialogMessage) {

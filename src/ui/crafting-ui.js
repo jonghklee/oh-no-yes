@@ -104,9 +104,25 @@ class CraftingUI {
                     ix += r.measureText(it.text, 10) + 8;
                 });
 
-                // Station & level
-                r.text(`Lv.${recipe.level}`, 650, ry + 10, crafting.level >= recipe.level ? '#aaa' : '#ff6666', 10, 'right');
-                r.text(`${CraftingStations[recipe.station]?.icon || ''}`, 660, ry + 8, '#888', 12);
+                // Station, level & craftable count
+                r.text(`Lv.${recipe.level}`, 620, ry + 10, crafting.level >= recipe.level ? '#aaa' : '#ff6666', 10, 'right');
+                r.text(`${CraftingStations[recipe.station]?.icon || ''}`, 630, ry + 8, '#888', 12);
+
+                // How many can we craft?
+                if (canCraft.can) {
+                    const maxCraftable = Math.min(...recipe.ingredients.map(ing =>
+                        Math.floor(game.inventory.getCount(ing.item) / ing.qty)
+                    ));
+                    if (maxCraftable > 0) {
+                        r.text(`[${maxCraftable}]`, 660, ry + 28, '#88ff88', 9, 'right');
+                    }
+                }
+
+                // Seasonal badge
+                if (recipe.season) {
+                    const seasonIcons = { spring: '🌸', summer: '☀', autumn: '🍂', winter: '❄' };
+                    r.text(seasonIcons[recipe.season] || '', 670, ry + 8, '#fff', 12);
+                }
 
                 if (hovered && inp.clicked) {
                     CraftingUI.selectedRecipe = recipe.id;
