@@ -351,10 +351,14 @@ class CombatSystem {
             return result;
         }
 
-        // Back to player turn
+        // Back to player turn + MP regen
         this.player.defending = false;
         this.state = 'playerTurn';
         this.combo = 0;
+        // Passive MP regen (2 per turn)
+        if (this.player.currentMp < (this.player.maxMp || 20)) {
+            this.player.currentMp = Math.min(this.player.maxMp || 20, this.player.currentMp + 2);
+        }
         return result;
     }
 

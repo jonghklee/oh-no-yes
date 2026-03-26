@@ -39,6 +39,11 @@ class CombatUI {
         r.roundRect(ex - 60, ey - 10, 120, 130, 8, 'rgba(40,20,60,0.5)', '#5a3090');
         r.text(combat.enemy.icon, ex, ey + 20, '#fff', 50, 'center');
         r.textBold(combat.enemy.name, ex, ey + 90, '#fff', 14, 'center');
+        // Enemy description on hover
+        if (combat.enemy.description && inp.isOver(ex - 60, ey - 10, 120, 130)) {
+            r.roundRect(ex - 100, ey + 195, 200, 20, 4, 'rgba(10,5,25,0.9)', '#5a3090');
+            r.text(combat.enemy.description, ex, ey + 200, '#aaa', 8, 'center');
+        }
 
         // Enemy HP bar with percentage
         const enemyHpPct = Math.round(combat.enemy.currentHp / combat.enemy.maxHp * 100);
