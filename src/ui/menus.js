@@ -444,6 +444,55 @@ class ExploreUI {
                 ]);
                 break;
             }
+            case 'collapsed_tunnel':
+            case 'avalanche':
+            case 'cursed_altar': {
+                // Trap event - risk/reward choice
+                game.showDialog('⚠ You triggered a trap! What do you do?', [
+                    { label: '🛡 Brace (lose some HP)', action: () => {
+                        const dmg = Utils.random(5, 15);
+                        game.notify(`Took ${dmg} damage from the trap!`, '#ff4444');
+                        game.dismissDialog();
+                    }},
+                    { label: '🔍 Disarm (+gold if success)', action: () => {
+                        if (Math.random() < 0.6) {
+                            const gold = Utils.random(50, 200) * game.level;
+                            game.addGold(gold);
+                            game.notify(`Disarmed! Found ${gold}g hidden cache!`, '#44ff44');
+                        } else {
+                            game.notify('Failed to disarm! Nothing happened.', '#ff8844');
+                        }
+                        game.dismissDialog();
+                    }}
+                ]);
+                break;
+            }
+            case 'dwarven_forge':
+            case 'ancient_tomb':
+            case 'hidden_library': {
+                // Tiered treasure chest
+                const chestRoll = Math.random();
+                let chestType, chestItems, chestGold;
+                if (chestRoll < 0.05) {
+                    chestType = '🟡 Gold Chest';
+                    chestGold = Utils.random(300, 800) * game.level;
+                    chestItems = [{ id: Utils.choice(['diamond', 'mithril_ore', 'dragon_scale']), qty: Utils.random(1, 3) }];
+                } else if (chestRoll < 0.25) {
+                    chestType = '⬜ Silver Chest';
+                    chestGold = Utils.random(100, 300) * game.level;
+                    chestItems = [{ id: Utils.choice(['ruby', 'sapphire', 'emerald', 'crystal']), qty: Utils.random(1, 2) }];
+                } else {
+                    chestType = '🟤 Bronze Chest';
+                    chestGold = Utils.random(30, 100) * game.level;
+                    chestItems = [{ id: Utils.choice(['iron_ore', 'herb', 'leather', 'moonflower']), qty: Utils.random(2, 5) }];
+                }
+                game.addGold(chestGold);
+                chestItems.forEach(ci => game.inventory.addItem(ci.id, ci.qty));
+                const itemNames = chestItems.map(ci => `${ItemDB[ci.id]?.icon || ''}x${ci.qty}`).join(', ');
+                game.notify(`${chestType}! +${chestGold}g, ${itemNames}`, chestRoll < 0.05 ? '#ffd700' : chestRoll < 0.25 ? '#c0c0c0' : '#cd7f32', 4000);
+                if (chestRoll < 0.05) game.particles.burst(600, 400, 15, '#ffd700', 4);
+                break;
+            }
             case 'herb_patch':
             case 'flower_field': {
                 const qty = Utils.random(3, 8);
