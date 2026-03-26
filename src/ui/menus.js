@@ -361,10 +361,24 @@ class ExploreUI {
         const leaveHover = inp.isOver(30, 620, 200, 40);
         r.button(30, 620, 200, 40, '🚪 Leave', leaveHover, false, '#5a2020');
         if (inp.clickedIn(30, 620, 200, 40)) {
+            const areaId = area.id;
             const results = exploration.endExploration();
             const itemCount = results.items.length;
             game.notify(`Exploration complete! Floor ${results.floorsExplored}, ${itemCount} items gathered.`, '#44ddff', 4000);
             game.audio.click();
+            // Show "Explore Again" option
+            if (exploration.canExplore(areaId, game.level).can) {
+                setTimeout(() => {
+                    game.showDialog(`Return to ${AreaDB[areaId]?.name}?`, [
+                        { label: '🔄 Explore Again', action: () => {
+                            exploration.startExploration(areaId, game.level, game.getSkillBonuses());
+                            game.audio.discover();
+                            game.dismissDialog();
+                        }},
+                        { label: 'Back to Map', action: () => game.dismissDialog() }
+                    ]);
+                }, 500);
+            }
         }
 
         // Boss rechallenge (when on boss floor and boss was already defeated)
