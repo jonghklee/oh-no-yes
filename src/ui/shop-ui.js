@@ -316,6 +316,10 @@ class ShopUI {
         r.text(`Total Earnings: ${Utils.formatGold(shop.totalEarnings)}g`, 25, 705, '#aaa', 11);
         r.text(`Tax Rate: ${Math.round(game.economy.getEffectiveTaxRate(bonuses) * 100)}%`, 25, 725, '#ff8888', 11);
 
+        // Shop rating stars
+        const shopStars = shop.totalSales >= 500 ? 5 : shop.totalSales >= 200 ? 4 : shop.totalSales >= 50 ? 3 : shop.totalSales >= 10 ? 2 : shop.totalSales >= 1 ? 1 : 0;
+        r.text('★'.repeat(shopStars) + '☆'.repeat(5 - shopStars), 25, 740, '#ffd700', 10);
+
         // Skip day button
         const skipHover = inp.isOver(200, 710, 170, 30);
         r.button(200, 710, 170, 30, '⏭ Skip to Next Day', skipHover);
