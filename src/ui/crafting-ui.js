@@ -3,6 +3,7 @@ class CraftingUI {
     static selectedRecipe = null;
     static selectedStation = 'all';
     static scrollY = 0;
+    static favorites = new Set();
 
     static render(game) {
         const r = game.renderer;
@@ -71,6 +72,16 @@ class CraftingUI {
             CraftingUI.scrollY = Utils.clamp(CraftingUI.scrollY - inp.scrollDelta * 30, -(recipes.length * 54 - 600), 0);
         }
 
+        // Sort: favorites first, then by craftability
+        recipes.sort((a, b) => {
+            const aFav = CraftingUI.favorites.has(a.id) ? 0 : 1;
+            const bFav = CraftingUI.favorites.has(b.id) ? 0 : 1;
+            if (aFav !== bFav) return aFav - bFav;
+            const aCraft = crafting.canCraft(a.id, game.inventory).can ? 0 : 1;
+            const bCraft = crafting.canCraft(b.id, game.inventory).can ? 0 : 1;
+            return aCraft - bCraft;
+        });
+
         let ry = 90 + CraftingUI.scrollY;
         for (const recipe of recipes) {
             if (ry > 50 && ry < 730) {
@@ -80,10 +91,11 @@ class CraftingUI {
                 const canCraft = crafting.canCraft(recipe.id, game.inventory);
                 const isSelected = CraftingUI.selectedRecipe === recipe.id;
                 const hovered = inp.isOver(210, ry, 480, 50);
+                const isFav = CraftingUI.favorites.has(recipe.id);
 
                 r.roundRect(210, ry, 480, 50, 4,
                     isSelected ? 'rgba(80,40,120,0.6)' :
-                    (hovered ? 'rgba(61,30,109,0.3)' : 'rgba(20,10,40,0.3)'),
+                    (hovered ? 'rgba(61,30,109,0.3)' : (isFav ? 'rgba(40,30,20,0.3)' : 'rgba(20,10,40,0.3)')),
                     canCraft.can ? '#3d1e6d' : '#2a2a2a');
 
                 r.text(result.icon || '?', 225, ry + 8, '#fff', 22);
@@ -103,6 +115,15 @@ class CraftingUI {
                     r.text(it.text, ix, ry + 28, it.color, 10);
                     ix += r.measureText(it.text, 10) + 8;
                 });
+
+                // Favorite star
+                const starHover = inp.isOver(210, ry + 2, 18, 18);
+                r.text(isFav ? '★' : '☆', 215, ry + 4, isFav ? '#ffd700' : (starHover ? '#888' : '#444'), 12);
+                if (starHover && inp.clicked) {
+                    if (isFav) CraftingUI.favorites.delete(recipe.id);
+                    else CraftingUI.favorites.add(recipe.id);
+                    game.audio.click();
+                }
 
                 // Station, level & craftable count
                 r.text(`Lv.${recipe.level}`, 620, ry + 10, crafting.level >= recipe.level ? '#aaa' : '#ff6666', 10, 'right');

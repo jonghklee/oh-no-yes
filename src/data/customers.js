@@ -146,7 +146,7 @@ function generateCustomer(day, reputation) {
     // Scale budget with day (faster scaling for better progression feel)
     const scaledBudget = Math.floor(budget * (1 + day * 0.05 + Math.floor(day / 30) * 0.3));
 
-    return {
+    const customer = {
         ...Utils.deepClone(template),
         id: Utils.generateId(),
         budget: scaledBudget,
@@ -157,4 +157,22 @@ function generateCustomer(day, reputation) {
         haggleAttempts: 0,
         maxHaggle: 2
     };
+
+    // 15% chance of special request (specific item wanted, 2x pay)
+    if (Math.random() < 0.15 && day >= 5) {
+        const specialItems = {
+            material: ['iron_ore', 'silver_ore', 'crystal', 'moonflower', 'silk', 'enchanted_wood'],
+            potion: ['health_potion', 'mana_potion', 'strength_elixir'],
+            weapon: ['iron_sword', 'steel_sword', 'hunting_bow', 'crystal_staff'],
+            armor: ['iron_armor', 'steel_armor', 'silk_robe'],
+            gem: ['ruby', 'sapphire', 'emerald'],
+            food: ['bread', 'stew', 'feast'],
+            accessory: ['copper_ring', 'silver_necklace', 'lucky_charm']
+        };
+        const catItems = specialItems[customer.wantedCategory] || specialItems.material;
+        customer.specialRequest = Utils.choice(catItems);
+        customer.specialBonus = 2.0; // 2x price for specific item
+    }
+
+    return customer;
 }

@@ -111,6 +111,14 @@ class ShopUI {
             r.text(`Budget: ${Utils.formatGold(customer.budget)}g`, cx + 60, cy + 30, '#ffd700', 11);
             r.text(`Wants: ${customer.wantedCategory}`, cx + 60, cy + 48, '#aaa', 10);
 
+            // Special request indicator
+            if (customer.specialRequest) {
+                const srItem = ItemDB[customer.specialRequest];
+                if (srItem) {
+                    r.text(`⭐ Wants: ${srItem.icon}${srItem.name} (2x!)`, cx + 10, cy + 62, '#ffd700', 9);
+                }
+            }
+
             // Patience bar
             r.text('Patience:', cx + 10, cy + 75, '#888', 9);
             r.progressBar(cx + 70, cy + 75, 100, 10,
