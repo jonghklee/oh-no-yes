@@ -20,6 +20,7 @@ class Game {
         this.quests = new QuestSystem();
         this.endless = new EndlessDungeon();
         this.daily = new DailyChallengeSystem();
+        this.codex = new Codex();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -117,6 +118,7 @@ class Game {
             this.baseStats.def += 1;
             this.notify(`Level Up! You are now level ${this.level}!`, '#ffd700');
             this.audio.levelUp();
+            this.particles.levelUpEffect(600, 400);
         }
     }
 
@@ -335,12 +337,16 @@ class Game {
         // Quest progress
         this.quests.updateProgress('defeatBoss', { boss: this.combat.enemy?.id });
 
-        // Reputation & daily progress
+        // Reputation, daily progress & codex
         if (rewards.isBoss) {
             this.reputation.addReputation(10);
             this.audio.victory();
         }
         this.trackDaily('defeat', 1);
+        if (this.combat.enemy) this.codex.discoverEnemy(this.combat.enemy.id);
+        for (const drop of rewards.drops) {
+            this.codex.discoverItem(drop.item);
+        }
 
         // Return to exploration or endless dungeon
         if (this.endless.active) {
@@ -432,7 +438,8 @@ class Game {
             prestige: this.prestige.serialize(),
             endless: this.endless.serialize(),
             achievements: this.achievements.serialize(),
-            daily: this.daily.serialize()
+            daily: this.daily.serialize(),
+            codex: this.codex.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -449,7 +456,8 @@ class Game {
         this.baseStats = data.baseStats || this.baseStats;
         this.dayPhase = data.dayPhase || 'morning';
         this.gameSpeed = data.gameSpeed || 1;
-        this.showTutorial = data.showTutorial !== undefined ? data.showTutorial : true;
+        // Skip tutorial on saves past day 3
+        this.showTutorial = (data.day || 1) <= 3 ? (data.showTutorial !== undefined ? data.showTutorial : true) : false;
         this.tutorialStep = data.tutorialStep || 0;
         this.prestigeLevel = data.prestigeLevel || 0;
 
@@ -466,6 +474,7 @@ class Game {
         if (data.endless) this.endless.deserialize(data.endless);
         if (data.achievements) this.achievements.deserialize(data.achievements);
         if (data.daily) this.daily.deserialize(data.daily);
+        if (data.codex) this.codex.deserialize(data.codex);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';

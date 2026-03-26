@@ -172,6 +172,8 @@ class ExploreUI {
                 } else if (result.type === 'gather') {
                     for (const g of result.items) {
                         game.inventory.addItem(g.item, g.qty);
+                        game.codex.discoverItem(g.item);
+                        game.trackDaily('gather', g.qty);
                     }
                 } else if (result.type === 'event') {
                     ExploreUI.handleEvent(game, result.event);

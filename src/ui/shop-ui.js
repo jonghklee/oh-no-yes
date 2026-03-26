@@ -126,10 +126,14 @@ class ShopUI {
                 if (result) {
                     game.addGold(result.price);
                     game.audio.sell();
+                    game.particles.saleEffect(600, 480);
                     game.particles.goldGain(600, 500, result.price);
                     game.reputation.addReputation(2);
                     game.quests.updateProgress('sell', { count: 1 });
+                    game.trackDaily('sell', 1);
+                    game.trackDaily('earnGold', result.price);
                     game.notify(`Sold ${result.item.name} for ${result.price}g!`, '#44ff44');
+                    game.renderer.shake(100);
                 }
             }
 

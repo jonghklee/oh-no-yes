@@ -50,12 +50,43 @@ class ParticleSystem {
     }
 
     goldGain(x, y, amount) {
-        this.floatingText(x, y, `+${amount}g`, '#ffd700', 14);
+        this.floatingText(x, y, `+${amount}g`, '#ffd700', 16);
         this.sparkle(x, y, '#ffd700');
+        // Coin shower effect
+        for (let i = 0; i < 5; i++) {
+            this.emit(x + Utils.random(-20, 20), y, 1, '#ffd700', 1.5, 40, 2);
+        }
     }
 
     xpGain(x, y, amount) {
         this.floatingText(x, y, `+${amount} XP`, '#44aaff', 12);
+    }
+
+    saleEffect(x, y) {
+        this.burst(x, y, 12, '#ffd700', 3);
+        this.burst(x, y, 8, '#44ff44', 2);
+        this.floatingText(x, y - 20, 'SOLD!', '#44ff44', 18, 40);
+    }
+
+    craftEffect(x, y) {
+        this.burst(x, y, 10, '#4488ff', 2.5);
+        this.sparkle(x, y, '#88aaff');
+    }
+
+    levelUpEffect(x, y) {
+        for (let i = 0; i < 20; i++) {
+            const angle = (i / 20) * Math.PI * 2;
+            this.particles.push({
+                x, y,
+                vx: Math.cos(angle) * 3,
+                vy: Math.sin(angle) * 3,
+                life: 50,
+                maxLife: 50,
+                color: Utils.choice(['#ffd700', '#ff44ff', '#44ffff', '#44ff44']),
+                size: 4
+            });
+        }
+        this.floatingText(x, y - 30, 'LEVEL UP!', '#ffd700', 24, 80);
     }
 
     update() {
