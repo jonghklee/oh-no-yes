@@ -28,6 +28,8 @@ class Game {
         this.luckySpin = new LuckySpinSystem();
         this.fusion = new FusionSystem();
         this.marketOrders = new MarketOrderSystem();
+        this.challengeMode = new ChallengeModeSystem();
+        this.statsTracker = new StatsTracker();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -164,6 +166,13 @@ class Game {
         this.economy.updatePrices(this.day);
         this.shop.newDay();
         this.exploration.newDay();
+
+        // Record daily stats
+        this.statsTracker.recordDay(
+            this.shop.dailyEarnings,
+            this.shop.dailySales,
+            this.crafting.totalCrafts // cumulative but that's ok
+        );
 
         // Reset daily synergy
         this._dailyActivities = new Set();
@@ -313,6 +322,21 @@ class Game {
         // Update systems
         this.particles.update();
         this.animations.update(dt);
+
+        // Challenge mode update
+        if (this.challengeMode.active) {
+            const challengeResult = this.challengeMode.update(dt);
+            if (challengeResult) {
+                // Challenge completed
+                if (challengeResult.reward.gold) this.addGold(challengeResult.reward.gold);
+                if (challengeResult.reward.xp) this.addXp(challengeResult.reward.xp);
+                const recordText = challengeResult.isNewRecord ? ' 🏆 NEW RECORD!' : '';
+                this.notify(`${challengeResult.challenge.icon} ${challengeResult.challenge.name}: Score ${challengeResult.score}!${recordText}`, '#ff44ff', 5000);
+                this.notify(`Reward: +${challengeResult.reward.gold}g, +${challengeResult.reward.xp}XP`, '#ffd700');
+                this.audio.victory();
+                this.particles.burst(600, 400, 20, '#ff44ff', 4);
+            }
+        }
 
         // Lucky spin update
         const spinResult = this.luckySpin.update(dt);
@@ -648,6 +672,8 @@ class Game {
         this.particles.goldGain(600, 400, price);
         this.trackDaily('sell', 1);
         this.trackDaily('earnGold', price);
+        this.challengeMode.addScore('sales', 1);
+        this.challengeMode.addScore('gold', price);
 
         // Synergy tracking
         this._dailyActivities = this._dailyActivities || new Set();
@@ -690,7 +716,9 @@ class Game {
             milestones: this.milestones.serialize(),
             luckySpin: this.luckySpin.serialize(),
             fusion: this.fusion.serialize(),
-            marketOrders: this.marketOrders.serialize()
+            marketOrders: this.marketOrders.serialize(),
+            challengeMode: this.challengeMode.serialize(),
+            statsTracker: this.statsTracker.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -733,6 +761,8 @@ class Game {
         if (data.luckySpin) this.luckySpin.deserialize(data.luckySpin);
         if (data.fusion) this.fusion.deserialize(data.fusion);
         if (data.marketOrders) this.marketOrders.deserialize(data.marketOrders);
+        if (data.challengeMode) this.challengeMode.deserialize(data.challengeMode);
+        if (data.statsTracker) this.statsTracker.deserialize(data.statsTracker);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';

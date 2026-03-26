@@ -590,14 +590,45 @@ class QuestUI {
 
         // New Game+ button
         if (game.canPrestige()) {
-            const ngHover = inp.isOver(920, 720, 250, 28);
-            r.button(920, 720, 250, 28, `⭐ New Game+ (P${(game.prestigeLevel || 0) + 1})`, ngHover, false, '#5a2080');
-            if (inp.clickedIn(920, 720, 250, 28)) {
+            const ngHover = inp.isOver(920, 695, 250, 22);
+            r.button(920, 695, 250, 22, `⭐ New Game+ (P${(game.prestigeLevel || 0) + 1})`, ngHover, false, '#5a2080');
+            if (inp.clickedIn(920, 695, 250, 22)) {
                 game.showDialog('Start New Game+? Keep 10% gold, gain permanent stat bonuses!', [
                     { label: 'Prestige!', action: () => { game.startPrestige(); game.dismissDialog(); } },
                     { label: 'Not yet', action: () => game.dismissDialog() }
                 ]);
             }
+        }
+
+        // Income graph (bottom of stats panel)
+        game.statsTracker.renderGraph(r, game.statsTracker.dailyIncome, 920, 720, 130, 28, '#ffd700', 'Income');
+        game.statsTracker.renderGraph(r, game.statsTracker.dailySales, 1055, 720, 130, 28, '#44ff44', 'Sales');
+
+        // === CHALLENGE MODE (bottom of active quests) ===
+        if (!game.challengeMode.active && game.level >= 5) {
+            const challenges = game.challengeMode.getChallenges();
+            let cx = 20;
+            r.text('⏱ Challenges:', 20, 740, '#ff88ff', 10);
+            challenges.forEach((ch, i) => {
+                if (i > 1) return; // Show 2 at a time
+                const chx = 120 + i * 200;
+                const chHover = inp.isOver(chx, 733, 180, 20);
+                const best = game.challengeMode.highScores[ch.id];
+                r.button(chx, 733, 180, 20, `${ch.icon} ${ch.name}${best ? ' (🏆'+best+')' : ''}`, chHover, false, '#4a2060');
+                if (inp.clickedIn(chx, 733, 180, 20)) {
+                    game.challengeMode.start(ch.id);
+                    game.notify(`${ch.icon} ${ch.name} started! ${ch.description}`, '#ff88ff', 4000);
+                    game.audio.discover();
+                }
+            });
+        }
+
+        // Active challenge HUD
+        if (game.challengeMode.active) {
+            const ch = game.challengeMode.currentChallenge;
+            r.roundRect(20, 730, 560, 22, 4, 'rgba(80,20,80,0.8)', '#ff44ff', 2);
+            r.textBold(`${ch.icon} ${ch.name}: Score ${game.challengeMode.score} | ⏱ ${game.challengeMode.getTimeRemaining()}s`, 30, 734, '#ff44ff', 11);
+            r.progressBar(400, 735, 170, 12, game.challengeMode.timer, ch.duration, '#ff44ff', '#222');
         }
     }
 }
