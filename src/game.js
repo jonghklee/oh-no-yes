@@ -198,6 +198,23 @@ class Game {
             this.notify(summary, '#aaaaff', 3000);
         }
 
+        // Weekly summary (every 7 days)
+        if (this.day % 7 === 0 && this.day > 7) {
+            const weeklyIncome = this.statsTracker.dailyIncome.slice(-7).reduce((a, b) => a + b, 0);
+            const prevWeekIncome = this.statsTracker.dailyIncome.slice(-14, -7).reduce((a, b) => a + b, 0);
+            const growth = prevWeekIncome > 0 ? Math.round((weeklyIncome / prevWeekIncome - 1) * 100) : 0;
+            const growthText = growth > 0 ? `📈 +${growth}%` : growth < 0 ? `📉 ${growth}%` : '➡ 0%';
+            setTimeout(() => {
+                this.showDialog(
+                    `📊 Weekly Report (Week ${Math.floor(this.day / 7)})\n\n` +
+                    `💰 Income: ${Utils.formatGold(weeklyIncome)}g ${growthText}\n` +
+                    `📈 Sales: ${this.shop.totalSales}\n` +
+                    `🏰 Endless Best: F${this.endless.highestFloor}\n` +
+                    `⭐ Reputation: ${this.reputation.reputation}\n\n` +
+                    `Keep growing your merchant empire!`, null);
+            }, 1000);
+        }
+
         // Update systems
         this.economy.updatePrices(this.day);
         this.shop.newDay();
