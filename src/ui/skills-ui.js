@@ -67,7 +67,14 @@ class SkillsUI {
                     const tx = sx + (cellW - 10) / 2;
                     const ty = sy;
                     const lineColor = unlocked ? tree.color : (skills.unlockedSkills.has(req) ? '#555' : '#333');
-                    r.line(rx, ry, tx, ty, lineColor, 2);
+                    const lineWidth = unlocked ? 3 : (canUnlock ? 2 : 1);
+                    r.line(rx, ry, tx, ty, lineColor, lineWidth);
+                    // Glow on unlocked paths
+                    if (unlocked) {
+                        r.setAlpha(0.15);
+                        r.line(rx, ry, tx, ty, tree.color, 6);
+                        r.resetAlpha();
+                    }
                 }
             }
 

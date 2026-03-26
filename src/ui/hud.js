@@ -30,8 +30,13 @@ class HUD {
         r.text(`${phaseIcons[game.dayPhase]} ${game.dayPhase}`, 490, 14, '#ddd', 12);
         r.progressBar(570, 18, 50, 8, phaseProgress, 1, '#4a3080', '#222');
 
+        // Weather indicator
+        const weatherSeed = (game.day * 7 + 3) % 10;
+        const weatherIcon = weatherSeed < 3 ? '☀' : weatherSeed < 5 ? '🌧' : weatherSeed < 7 ? '❄' : weatherSeed < 9 ? '🌫' : '💨';
+        r.text(weatherIcon, 625, 14, '#888', 11);
+
         // Stamina
-        r.text(`⚡ ${game.exploration.stamina}/${game.exploration.maxStamina}`, 640, 14, '#44ddff', 12);
+        r.text(`⚡ ${game.exploration.stamina}/${game.exploration.maxStamina}`, 645, 14, '#44ddff', 12);
 
         // Reputation
         r.text(`⭐ ${game.reputation.getDisplayTitle()}`, 750, 14, '#ffaa44', 12);
