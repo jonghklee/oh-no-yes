@@ -875,7 +875,7 @@ class QuestUI {
             { label: 'Sales', value: stats.totalSales, color: '#88ff88' },
             { label: 'Endless', value: `F${game.endless.highestFloor}`, color: '#ff44ff' },
             { label: 'Chests', value: game.mystery.totalOpened, color: '#44ddff' },
-            { label: 'Fusions', value: game.fusion.totalFusions, color: '#aa88ff' },
+            { label: 'Enhance', value: game.enhance.totalEnhancements, color: '#aa88ff' },
         ];
         keyStats.forEach((s, i) => {
             const sx = 915 + (i % 2) * 140;
