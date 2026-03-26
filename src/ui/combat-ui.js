@@ -56,12 +56,20 @@ class CombatUI {
             r.text(`Defeated: ${killCount}x`, ex, ey + 103, '#888', 8, 'center');
         }
 
-        // Elemental type indicator
+        // Elemental type + weakness hint
         const elemIcons = { fire: '🔥', ice: '❄', nature: '🌿', dark: '🌑', physical: '⚔' };
-        const elemColors = { fire: '#ff4400', ice: '#44aaff', nature: '#44ff44', dark: '#aa44ff', physical: '#aaaaaa' };
+        const weakTo = { fire: 'ice', ice: 'nature', nature: 'fire', dark: 'nature', physical: null };
         if (combat.enemy.element) {
             r.text(elemIcons[combat.enemy.element] || '', ex + 55, ey + 10, '#fff', 14);
+            // Show weakness
+            const weak = weakTo[combat.enemy.element];
+            if (weak) {
+                r.text(`Weak: ${elemIcons[weak]}`, ex, ey + 183, '#88ff88', 8, 'center');
+            }
         }
+
+        // Turn counter
+        r.text(`Turn ${Math.ceil(combat.log.length / 2)}`, 30, 510, '#666', 9);
 
         // Combo counter
         if (combat.combo > 1) {
@@ -290,9 +298,10 @@ class CombatUI {
                 });
             }
 
-            // Flee
+            // Flee with success rate
+            const escapeChance = Math.min(100, Math.round((0.3 + (combat.player.speed - combat.enemy.speed) * 0.05) * 100));
             const fleeHover = inp.isOver(570, 690, 170, 28);
-            r.button(570, 690, 170, 28, '🏃 Flee', fleeHover, false, '#5a2020');
+            r.button(570, 690, 170, 28, `🏃 Flee (${escapeChance}%)`, fleeHover, false, '#5a2020');
             if (inp.clickedIn(570, 690, 170, 28)) {
                 if (game.endless.active) {
                     // Leaving endless dungeon
