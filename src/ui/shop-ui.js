@@ -122,7 +122,7 @@ class ShopUI {
         });
 
         // === RIGHT PANEL: Customers ===
-        r.panel(400, 55, 790, 340, '👥 Customers');
+        r.panel(400, 55, 790, 340, `👥 Customers (${shop.customers.length}/${shop.maxCustomers})`);
 
         // Daily shop goal
         const dailyGoal = Math.round(100 * game.level * (1 + game.day * 0.02));
