@@ -64,8 +64,10 @@ class HUD {
         const weatherIcon = weatherSeed < 3 ? '☀' : weatherSeed < 5 ? '🌧' : weatherSeed < 7 ? '❄' : weatherSeed < 9 ? '🌫' : '💨';
         r.text(weatherIcon, 625, 14, '#888', 11);
 
-        // Stamina
-        r.text(`⚡ ${game.exploration.stamina}/${game.exploration.maxStamina}`, 645, 14, '#44ddff', 12);
+        // Stamina with color
+        const stamPct = game.exploration.stamina / game.exploration.maxStamina;
+        const stamColor = stamPct > 0.5 ? '#44ddff' : stamPct > 0.25 ? '#dddd44' : '#ff4444';
+        r.text(`⚡ ${game.exploration.stamina}/${game.exploration.maxStamina}`, 645, 14, stamColor, 12);
 
         // Reputation
         r.text(`⭐ ${game.reputation.getDisplayTitle()}`, 750, 14, '#ffaa44', 12);
