@@ -56,7 +56,9 @@ class ExploreUI {
             r.text(area.description, ax + 15, ay + 55, unlocked ? '#aaa' : '#444', 10);
 
             // Info
+            const runsLeft = Math.floor(exploration.stamina / area.staminaCost);
             r.text(`Stamina: ${area.staminaCost}⚡`, ax + 15, ay + 80, '#44ddff', 10);
+            if (unlocked && runsLeft > 0) r.text(`(${runsLeft}x)`, ax + 110, ay + 82, '#88ff88', 8);
             r.text(`Floors: ${area.floors}`, ax + 140, ay + 80, '#aaa', 10);
             r.text(`Unlock: Lv.${area.unlockLevel}`, ax + 240, ay + 80, unlocked ? '#88ff88' : '#ff6666', 10);
 
