@@ -137,9 +137,23 @@ class Game {
     }
 
     advanceDay() {
+        // End-of-day summary (before resetting daily stats)
+        const daySummary = {
+            sales: this.shop.dailySales,
+            earnings: this.shop.dailyEarnings,
+            dailyDone: this.daily.completedToday
+        };
+
         this.day++;
         this.dayPhase = 'morning';
         this.dayTimer = 0;
+
+        // Show brief summary notification
+        if (daySummary.sales > 0 || daySummary.earnings > 0) {
+            let summary = `Day ${this.day - 1} recap: ${daySummary.sales} sales, ${daySummary.earnings}g earned`;
+            if (daySummary.dailyDone) summary += ' ✅ Daily done!';
+            this.notify(summary, '#aaaaff', 4000);
+        }
 
         // Update systems
         this.economy.updatePrices(this.day);
@@ -197,6 +211,32 @@ class Game {
 
     update(dt) {
         if (this.screen === 'title') return;
+
+        // Handle keyboard shortcuts (before pause check)
+        if (this.input.justPressed(' ')) {
+            this.paused = !this.paused;
+            this.audio.click();
+        }
+        if (this.input.justPressed('Escape')) {
+            if (SettingsUI.visible) {
+                SettingsUI.visible = false;
+            } else if (this.dialogMessage) {
+                this.dismissDialog();
+            } else if (this.exploration.active) {
+                this.exploration.endExploration();
+            }
+        }
+
+        // Tab switching (always available, even when paused)
+        if (!this.combat.active && !SettingsUI.visible) {
+            const tabs = ['shop', 'craft', 'explore', 'inventory', 'skills', 'quest', 'map'];
+            for (let i = 0; i < tabs.length; i++) {
+                if (this.input.justPressed((i + 1).toString())) {
+                    this.switchScreen(tabs[i]);
+                }
+            }
+        }
+
         if (this.paused) return;
 
         dt *= this.gameSpeed;
@@ -215,6 +255,14 @@ class Game {
         // Update systems
         this.particles.update();
         this.animations.update(dt);
+
+        // Sell combo timer decay
+        if (this._sellCombo && this._sellCombo.timer > 0) {
+            this._sellCombo.timer -= dt;
+            if (this._sellCombo.timer <= 0) {
+                this._sellCombo = { category: null, count: 0, timer: 0 };
+            }
+        }
 
         // Music mood based on screen
         const moodMap = { shop: 'shop', craft: 'shop', inventory: 'shop', skills: 'shop',
@@ -417,7 +465,27 @@ class Game {
 
     sellItem(itemId) {
         const bonuses = this.getSkillBonuses();
-        const price = this.economy.getSellPrice(itemId, 1.0, bonuses);
+        let price = this.economy.getSellPrice(itemId, 1.0, bonuses);
+
+        // Sell combo system - selling items of same category in sequence gives bonus
+        const item = ItemDB[itemId];
+        if (item) {
+            if (!this._sellCombo) this._sellCombo = { category: null, count: 0, timer: 0 };
+            if (item.category === this._sellCombo.category && this._sellCombo.timer > 0) {
+                this._sellCombo.count++;
+                const comboBonus = Math.min(0.5, this._sellCombo.count * 0.05); // up to 50% bonus
+                const bonusGold = Math.round(price * comboBonus);
+                price += bonusGold;
+                if (this._sellCombo.count >= 3 && this._sellCombo.count % 3 === 0) {
+                    this.notify(`🔥 Sell Combo x${this._sellCombo.count}! +${Math.round(comboBonus * 100)}% bonus!`, '#ff8844');
+                    this.particles.burst(600, 400, 8, '#ff8844', 2);
+                }
+            } else {
+                this._sellCombo = { category: item.category, count: 1, timer: 3000 };
+            }
+            this._sellCombo.timer = 3000; // Reset timer on each sell
+        }
+
         if (!this.inventory.removeItem(itemId, 1)) return false;
 
         this.addGold(price);
