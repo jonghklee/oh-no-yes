@@ -8,7 +8,7 @@ class CraftingSystem {
         this.craftQueue = [];
         this.currentCraft = null;
         this.craftTimer = 0;
-        this.discoveredRecipes = new Set(['wooden_sword', 'leather_armor', 'copper_ring', 'bread', 'health_potion', 'iron_ingot', 'herb_pouch']);
+        this.discoveredRecipes = new Set(['wooden_sword', 'leather_armor', 'copper_ring', 'bread', 'health_potion', 'iron_ingot', 'herb_pouch', 'hunting_bow', 'stew', 'pickaxe']);
     }
 
     canCraft(recipeId, inventory, currentDay) {

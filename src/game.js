@@ -394,6 +394,7 @@ class Game {
                 this.quests.updateProgress('craft', { count: 1 });
                 this.quests.updateProgress('totalCrafts', { count: this.crafting.totalCrafts });
                 this.trackDaily('craft', 1);
+                this.challengeMode.addScore('crafts', 1);
                 this.codex.discoverItem(result.itemId);
                 if (RecipeDB[result.itemId]) {
                     this.quests.updateProgress('craftCategory', { category: RecipeDB[result.itemId].category, count: 1 });
@@ -555,6 +556,7 @@ class Game {
             this.audio.victory();
         }
         this.trackDaily('defeat', 1);
+        this.challengeMode.addScore('kills', 1);
         if (this.combat.enemy) this.codex.discoverEnemy(this.combat.enemy.id);
         this._dailyActivities = this._dailyActivities || new Set();
         this._dailyActivities.add('combat');
@@ -813,14 +815,19 @@ class Game {
     }
 
     newGame() {
-        // Give starting items
-        this.inventory.addItem('wood', 10);
-        this.inventory.addItem('herb', 5);
-        this.inventory.addItem('stone', 5);
-        this.inventory.addItem('leather', 3);
-        this.inventory.addItem('health_potion', 3);
+        // Give generous starting items for a fun first session
+        this.inventory.addItem('wood', 15);
+        this.inventory.addItem('herb', 10);
+        this.inventory.addItem('stone', 8);
+        this.inventory.addItem('leather', 5);
+        this.inventory.addItem('copper_ore', 5);
+        this.inventory.addItem('health_potion', 5);
+        this.inventory.addItem('bread', 3);
         this.inventory.addItem('wooden_sword', 1);
+        this.inventory.addItem('leather_armor', 1);
         this.inventory.equip('wooden_sword');
+        this.inventory.equip('leather_armor');
+        this.gold = 150; // Slightly more starting gold
 
         this.economy.updatePrices(1);
         this.screen = 'shop';
