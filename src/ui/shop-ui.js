@@ -216,6 +216,89 @@ class ShopUI {
             game.audio.click();
         }
 
+        // === MYSTERY CHESTS (in customer area when no negotiation) ===
+        if (!shop.activeNegotiation && shop.customers.length === 0) {
+            r.panel(400, 400, 790, 200, '🎁 Mystery Chests & Trade Routes');
+
+            // Mystery chests
+            const chests = game.mystery.getChestTypes();
+            chests.forEach((chest, i) => {
+                const cx = 420 + i * 255;
+                const cy = 435;
+                const hovered = inp.isOver(cx, cy, 240, 70);
+                r.roundRect(cx, cy, 240, 70, 6,
+                    hovered ? 'rgba(60,30,80,0.6)' : 'rgba(30,15,40,0.4)',
+                    chest.color, 1);
+                r.text(chest.icon, cx + 10, cy + 8, '#fff', 24);
+                r.textBold(chest.name, cx + 45, cy + 8, chest.color, 12);
+                r.text(`${chest.cost}g`, cx + 200, cy + 8, game.gold >= chest.cost ? '#ffd700' : '#ff6666', 12, 'right');
+                r.text(chest.description, cx + 10, cy + 30, '#888', 9);
+
+                // Open button
+                const openHover = inp.isOver(cx + 150, cy + 45, 80, 22);
+                r.button(cx + 150, cy + 45, 80, 22, '🔓 Open', openHover, game.gold < chest.cost);
+                if (game.gold >= chest.cost && inp.clickedIn(cx + 150, cy + 45, 80, 22)) {
+                    const result = game.mystery.openChest(chest.id, game.gold);
+                    if (result && !result.error) {
+                        game.spendGold(result.cost);
+                        for (const item of result.items) {
+                            game.inventory.addItem(item.item, item.qty);
+                            game.codex.discoverItem(item.item);
+                        }
+                        if (result.bonusGold > 0) game.addGold(result.bonusGold);
+
+                        if (result.isJackpot) {
+                            game.notify(`🎉 JACKPOT! Amazing loot from ${chest.name}!`, '#ffd700', 5000);
+                            game.audio.victory();
+                            game.particles.burst(600, 400, 30, '#ffd700', 5);
+                            game.renderer.shake(400);
+                        } else {
+                            const rarityColors = { common: '#9e9e9e', uncommon: '#4caf50', rare: '#2196f3', epic: '#9c27b0', legendary: '#ff9800' };
+                            const itemNames = result.items.map(i => `${ItemDB[i.item]?.name} x${i.qty}`).join(', ');
+                            game.notify(`${chest.icon} Got: ${itemNames}`, rarityColors[result.rarity] || '#fff', 4000);
+                            game.audio.discover();
+                            game.particles.sparkle(600, 400, rarityColors[result.rarity] || '#fff');
+                        }
+                    }
+                }
+            });
+
+            // Trade routes
+            const routes = game.tradeRoutes.getAvailableRoutes(game.day);
+            if (routes.length > 0) {
+                r.text('🚂 Trade Routes:', 420, 520, '#ffaa44', 11);
+                r.text(`Active: ${game.tradeRoutes.activeCaravans.length}/${game.tradeRoutes.maxActiveCaravans}`, 580, 520, '#aaa', 10);
+
+                routes.slice(0, 3).forEach((route, i) => {
+                    const rx = 420 + i * 255;
+                    const ry = 540;
+                    const hovered = inp.isOver(rx, ry, 240, 50);
+                    const canSend = game.gold >= route.investment && game.tradeRoutes.activeCaravans.length < game.tradeRoutes.maxActiveCaravans;
+
+                    r.roundRect(rx, ry, 240, 50, 4,
+                        hovered ? 'rgba(60,40,20,0.5)' : 'rgba(30,20,10,0.3)', '#8a6a3a');
+                    r.text(`${route.icon} ${route.name}`, rx + 8, ry + 5, '#fff', 11);
+                    r.text(`${route.investment}g → ${route.profitRange[0]}-${route.profitRange[1]}g (${route.distance}d)`, rx + 8, ry + 22, '#aaa', 9);
+                    r.text(`Risk: ${Math.round(route.risk * 100)}%`, rx + 8, ry + 36, route.risk > 0.15 ? '#ff8888' : '#aaa', 9);
+
+                    if (canSend && hovered && inp.clicked) {
+                        const result = game.tradeRoutes.sendCaravan(route.id, game.day, game.gold);
+                        if (result.success) {
+                            game.spendGold(result.cost);
+                            game.notify(`${route.icon} Caravan sent! Returns day ${result.returnDay}`, '#ffaa44');
+                            game.audio.coin();
+                        }
+                    }
+                });
+
+                // Active caravans display
+                game.tradeRoutes.activeCaravans.forEach((c, i) => {
+                    const daysLeft = c.returnDay - game.day;
+                    r.text(`${c.route.icon} ${c.route.name}: ${daysLeft}d left`, 420, 598 + i * 14, '#ffaa44', 9);
+                });
+            }
+        }
+
         // === BOTTOM RIGHT: Shop Upgrades ===
         if (!shop.activeNegotiation) {
             r.panel(400, 610, 790, 140, '🏗 Shop Upgrades');

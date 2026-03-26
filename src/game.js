@@ -21,6 +21,8 @@ class Game {
         this.endless = new EndlessDungeon();
         this.daily = new DailyChallengeSystem();
         this.codex = new Codex();
+        this.mystery = new MysteryChestSystem();
+        this.tradeRoutes = new TradeRouteSystem();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -143,6 +145,18 @@ class Game {
         this.economy.updatePrices(this.day);
         this.shop.newDay();
         this.exploration.newDay();
+
+        // Check trade route returns
+        const returns = this.tradeRoutes.checkReturns(this.day);
+        for (const ret of returns) {
+            if (ret.success) {
+                this.addGold(ret.profit);
+                this.notify(`${ret.icon} ${ret.message}`, '#44ff44', 5000);
+                this.audio.coin();
+            } else {
+                this.notify(`${ret.icon} ${ret.message}`, '#ff4444', 5000);
+            }
+        }
 
         // Generate daily challenge
         const challenge = this.daily.generateChallenge(this.day, this.level);
@@ -439,7 +453,9 @@ class Game {
             endless: this.endless.serialize(),
             achievements: this.achievements.serialize(),
             daily: this.daily.serialize(),
-            codex: this.codex.serialize()
+            codex: this.codex.serialize(),
+            mystery: this.mystery.serialize(),
+            tradeRoutes: this.tradeRoutes.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -475,6 +491,8 @@ class Game {
         if (data.achievements) this.achievements.deserialize(data.achievements);
         if (data.daily) this.daily.deserialize(data.daily);
         if (data.codex) this.codex.deserialize(data.codex);
+        if (data.mystery) this.mystery.deserialize(data.mystery);
+        if (data.tradeRoutes) this.tradeRoutes.deserialize(data.tradeRoutes);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';
