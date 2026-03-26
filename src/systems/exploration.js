@@ -75,12 +75,24 @@ class ExplorationSystem {
             const enemyId = Utils.choice(enemies);
             const enemy = EnemyDB[enemyId];
 
-            // Scale enemy with floor
+            // Scale enemy with floor and area revisit bonus
             const scaledEnemy = Utils.deepClone(enemy);
             const floorScale = 1 + (this.currentFloor - 1) * 0.1;
-            scaledEnemy.hp = Math.round(scaledEnemy.hp * floorScale);
-            scaledEnemy.atk = Math.round(scaledEnemy.atk * floorScale);
-            scaledEnemy.def = Math.round(scaledEnemy.def * floorScale);
+            // Endgame scaling: areas get harder after being fully explored
+            const maxFloor = this.maxFloorReached[this.currentArea.id] || 0;
+            const revisitScale = maxFloor >= this.currentArea.floors ? 1 + (maxFloor - this.currentArea.floors) * 0.05 : 1;
+            const totalScale = floorScale * revisitScale;
+            scaledEnemy.hp = Math.round(scaledEnemy.hp * totalScale);
+            scaledEnemy.atk = Math.round(scaledEnemy.atk * totalScale);
+            scaledEnemy.def = Math.round(scaledEnemy.def * totalScale);
+            // Endgame enemies also give better rewards
+            if (revisitScale > 1) {
+                scaledEnemy.xp = Math.round(scaledEnemy.xp * revisitScale);
+                scaledEnemy.gold = [
+                    Math.round(scaledEnemy.gold[0] * revisitScale),
+                    Math.round(scaledEnemy.gold[1] * revisitScale)
+                ];
+            }
 
             this.state = 'combat';
             this.addLog(`Encountered ${scaledEnemy.name}!`);

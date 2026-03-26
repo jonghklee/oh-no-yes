@@ -50,13 +50,26 @@ class TitleScreen {
             game.audio.click();
         }
 
-        // Continue button
+        // Continue button with save preview
         if (hasSave) {
             const contBtnY = btnY + 65;
-            const contHover = inp.isOver(450, contBtnY, 300, 50);
-            r.roundRect(450, contBtnY, 300, 50, 8, contHover ? '#2a5020' : '#1e4018', '#408030', 2);
-            r.textBold('📂  Continue', 600, contBtnY + 15, '#88ff88', 20, 'center');
-            if (inp.clickedIn(450, contBtnY, 300, 50)) {
+            const contHover = inp.isOver(450, contBtnY, 300, 70);
+            r.roundRect(450, contBtnY, 300, 70, 8, contHover ? '#2a5020' : '#1e4018', '#408030', 2);
+            r.textBold('📂  Continue', 600, contBtnY + 10, '#88ff88', 20, 'center');
+
+            // Save preview
+            try {
+                const saveData = JSON.parse(localStorage.getItem('ohnoyes_save'));
+                if (saveData) {
+                    const preview = `Lv.${saveData.level || 1} | Day ${saveData.day || 1} | ${Utils.formatGold(saveData.gold || 0)}g`;
+                    r.text(preview, 600, contBtnY + 38, '#6a9a6a', 11, 'center');
+                    if (saveData.prestigeLevel > 0) {
+                        r.text(`⭐ Prestige ${saveData.prestigeLevel}`, 600, contBtnY + 53, '#aa88ff', 9, 'center');
+                    }
+                }
+            } catch(e) {}
+
+            if (inp.clickedIn(450, contBtnY, 300, 70)) {
                 game.audio.init();
                 game.audio.click();
                 game.loadGame();

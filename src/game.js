@@ -649,6 +649,13 @@ class Game {
             this.skills.addPoints(this.prestigeLevel * 2);
             this.notify(`New Game+ ${this.prestigeLevel}! Prestige bonuses applied!`, '#ff44ff', 5000);
         } else {
+            // Welcome dialog for new players
+            setTimeout(() => {
+                this.showDialog(
+                    'Welcome to Oh No Yes! You\'ve inherited a small shop in a magical world. ' +
+                    'Buy materials, craft items, and sell to customers to build your merchant empire! ' +
+                    'Start by stocking items in your Shop Display.', null);
+            }, 500);
             this.notify('Welcome to Oh No Yes! Build your merchant empire!', '#ffd700', 5000);
         }
     }
