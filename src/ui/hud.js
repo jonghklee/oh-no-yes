@@ -28,10 +28,23 @@ class HUD {
             HUD._goldChangeTimer--;
         }
 
-        // Level
+        // Level with XP change flash
         r.text(`Lv.${game.level}`, 140, 14, '#fff', 13);
         const xpNeeded = getXpForLevel(game.level);
         r.progressBar(185, 16, 80, 12, game.xp, xpNeeded, '#6644aa', '#222', '#444');
+
+        // XP change indicator
+        if (!HUD._lastXp) HUD._lastXp = game.xp;
+        if (game.xp !== HUD._lastXp) {
+            HUD._xpChangeTimer = 40;
+            HUD._lastXp = game.xp;
+        }
+        if (HUD._xpChangeTimer > 0) {
+            r.setAlpha(HUD._xpChangeTimer / 40);
+            r.progressBar(185, 16, 80, 12, game.xp, xpNeeded, '#aa66ff', '#222');
+            r.resetAlpha();
+            HUD._xpChangeTimer--;
+        }
         r.text(`${game.xp}/${xpNeeded}`, 190, 16, '#ddd', 9);
 
         // Day & Season
