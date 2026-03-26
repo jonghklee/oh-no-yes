@@ -70,8 +70,15 @@ class HUD {
         // Reputation
         r.text(`⭐ ${game.reputation.getDisplayTitle()}`, 750, 14, '#ffaa44', 12);
 
-        // Crafting level
+        // Crafting level + queue indicator
         r.text(`🔨 Craft Lv.${game.crafting.level}`, 920, 14, '#4488ff', 11);
+        const craftProgress = game.crafting.getCraftProgress();
+        if (craftProgress) {
+            r.progressBar(920, 30, 60, 5, craftProgress.progress, 1, '#4488ff', '#222');
+            if (game.crafting.craftQueue.length > 0) {
+                r.text(`+${game.crafting.craftQueue.length}`, 985, 27, '#4488ff', 8);
+            }
+        }
 
         // Speed control
         const speedColors = { 1: '#aaa', 2: '#88ff88', 3: '#ffaa44' };
