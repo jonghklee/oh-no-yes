@@ -47,9 +47,10 @@ class ExploreUI {
             r.text(area.icon, ax + 15, ay + 10, '#fff', 28);
             r.textBold(area.name, ax + 55, ay + 10, unlocked ? '#fff' : '#666', 16);
 
-            // Difficulty
+            // Difficulty with color scaling
             const stars = '★'.repeat(area.difficulty) + '☆'.repeat(10 - area.difficulty);
-            r.text(stars, ax + 55, ay + 32, '#ffd700', 10);
+            const diffColor = area.difficulty <= 3 ? '#44ff44' : area.difficulty <= 6 ? '#ffd700' : '#ff4444';
+            r.text(stars, ax + 55, ay + 32, diffColor, 10);
 
             // Description
             r.text(area.description, ax + 15, ay + 55, unlocked ? '#aaa' : '#444', 10);

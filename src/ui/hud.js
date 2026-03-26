@@ -168,10 +168,11 @@ class HUD {
             r.text(`${tab.icon} ${tab.label}`, tx + tabWidth / 2, y + 12, textColor, 13, 'center');
             r.text(tab.key, tx + tabWidth - 12, y + 26, '#555', 9, 'right');
 
-            // Notification badge
+            // Notification badge with pulse for skills
             const badge = HUD.getTabBadge(game, tab.id);
             if (badge > 0 && !isActive) {
-                r.circle(tx + tabWidth - 12, y + 10, 8, '#ff4444');
+                const pulseSize = tab.id === 'skills' ? 8 + Math.sin(Date.now() / 300) * 2 : 8;
+                r.circle(tx + tabWidth - 12, y + 10, pulseSize, '#ff4444');
                 r.text(badge > 9 ? '!' : badge.toString(), tx + tabWidth - 12, y + 5, '#fff', 9, 'center');
             }
 
