@@ -107,6 +107,8 @@ class SkillsUI {
                 skills.unlock(SkillsUI.selectedTree, skillId);
                 game.audio.levelUp();
                 game.notify(`Learned ${skill.name}!`, tree.color);
+                game.particles.burst(sx + cellW/2, sy + cellH/2, 12, tree.color, 3);
+                game.renderer.flash(tree.color, 150);
             }
 
             if (hovered) SkillsUI.hoveredSkill = skillId;

@@ -308,7 +308,10 @@ class Game {
         const season = getSeason(this.day);
         const dayInSeason = getDayInSeason(this.day);
         if (dayInSeason === 1) {
-            this.notify(`${season.icon} ${season.name} has begun!`, season.color);
+            this.notify(`${season.icon} ${season.name} has begun!`, season.color, 5000);
+            this.renderer.flash(season.color, 300);
+            this.particles.burst(600, 400, 15, season.color, 3);
+            this.audio.discover();
         }
 
         // Event notifications
@@ -551,6 +554,20 @@ class Game {
     }
 
     handleCombatResult(result) {
+        // Visual feedback for enemy actions
+        if (result.dodged) {
+            this.particles.floatingText(350, 350, 'DODGE!', '#44ffff', 18, 40);
+            this.audio.click();
+        }
+        if (result.damage && !result.dodged) {
+            this.particles.damage(350, 370, result.damage, false);
+            this.renderer.shake(100);
+            if (result.damage > 20) this.renderer.flash('#ff0000', 80);
+        }
+        if (result.statusEffect) {
+            this.particles.floatingText(350, 320, result.statusEffect.toUpperCase(), '#ff8844', 12, 30);
+        }
+
         if (result.playerDefeated) {
             this.audio.defeat();
             this._combatStreak = 0; // Reset streak on defeat
