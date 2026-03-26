@@ -113,7 +113,12 @@ class SkillsUI {
             if (hovered && inp.clicked && canUnlock) {
                 skills.unlock(SkillsUI.selectedTree, skillId);
                 game.audio.levelUp();
-                game.notify(`Learned ${skill.name}!`, tree.color);
+                // Show what the skill does
+                const effectText = Object.entries(skill.effect).map(([k, v]) => {
+                    const label = k.replace(/([A-Z])/g, ' $1').trim();
+                    return typeof v === 'number' ? (v < 1 && v > 0 ? `${label} +${Math.round(v*100)}%` : `${label} +${v}`) : `${label}: ✓`;
+                }).join(', ');
+                game.notify(`🎯 ${skill.name}: ${effectText}`, tree.color, 4000);
                 game.particles.burst(sx + cellW/2, sy + cellH/2, 12, tree.color, 3);
                 game.renderer.flash(tree.color, 150);
             }
@@ -131,6 +136,13 @@ class SkillsUI {
             r.text('No skills unlocked yet.', 840, 200, '#666', 12);
             r.text('Spend skill points to gain bonuses!', 840, 220, '#555', 11);
         } else {
+            // Group bonuses by type
+            const combatBonuses = bonusEntries.filter(([k]) => ['atk','def','maxHp','critRate','critDmg','dodge','counter','lifesteal','maxStamina'].includes(k));
+            const tradeBonuses = bonusEntries.filter(([k]) => ['sellBonus','buyDiscount','customerRate','goldBonus','taxReduction'].includes(k));
+            const otherBonuses = bonusEntries.filter(([k]) => !combatBonuses.some(([ck]) => ck === k) && !tradeBonuses.some(([tk]) => tk === k));
+
+            if (combatBonuses.length > 0) { r.text('⚔ Combat:', 840, by, '#ff8844', 9); by += 14; }
+            if (tradeBonuses.length > 0 && combatBonuses.length > 0) {}
             bonusEntries.forEach(([key, val]) => {
                 const label = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
                 const displayVal = typeof val === 'number'
