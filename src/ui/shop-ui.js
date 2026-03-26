@@ -9,8 +9,30 @@ class ShopUI {
         // Shop background
         r.gradientRect(0, 50, 1200, 700, '#12081f', '#1a0a2e');
 
+        // === LUCKY SPIN (if available) ===
+        if (game.luckySpin.canSpin(game.day) && !game.luckySpin.spinning) {
+            const spinHover = inp.isOver(10, 55, 380, 30);
+            r.roundRect(10, 55, 380, 30, 6, spinHover ? 'rgba(120,50,120,0.7)' : 'rgba(80,30,80,0.6)', '#ff44ff', 2);
+            const pulse = Math.sin(Date.now() / 300) * 0.2 + 0.8;
+            r.setAlpha(pulse);
+            r.textBold('🎰 FREE Daily Lucky Spin! Click here!', 200, 61, '#ff44ff', 13, 'center');
+            r.resetAlpha();
+            if (inp.clickedIn(10, 55, 380, 30)) {
+                game.luckySpin.startSpin(game.day);
+                game.audio.click();
+            }
+        }
+        // Spinning animation
+        if (game.luckySpin.spinning) {
+            r.roundRect(10, 55, 380, 30, 6, 'rgba(60,20,60,0.8)', '#ff44ff', 2);
+            const slots = game.luckySpin.getSlots();
+            const current = slots[game.luckySpin.currentSlot];
+            r.textBold(`🎰 ${current.icon} ${current.name} 🎰`, 200, 61, current.color, 13, 'center');
+        }
+
         // === LEFT PANEL: Display Items ===
-        r.panel(10, 55, 380, 340, '🏪 Shop Display');
+        const shopPanelY = (game.luckySpin.canSpin(game.day) || game.luckySpin.spinning) ? 90 : 55;
+        r.panel(10, shopPanelY, 380, shopPanelY === 90 ? 305 : 340, '🏪 Shop Display');
 
         // Display slots
         for (let i = 0; i < shop.maxDisplay; i++) {

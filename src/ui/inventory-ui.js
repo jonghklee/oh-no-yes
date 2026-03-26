@@ -237,6 +237,25 @@ class InventoryUI {
             }
 
             // Use (for potions/food)
+            // Fusion (3 materials of same type → higher rarity)
+            if (item.category === 'material' && item.quantity >= 3 && ['common', 'uncommon', 'rare', 'epic'].includes(item.rarity)) {
+                const fuseHover = inp.isOver(850, by, 160, 35);
+                r.button(850, by, 160, 35, `🔄 Fuse 3→1 ↑`, fuseHover, false, '#4a2a6a');
+                r.text('Combine 3 for higher rarity', 1020, by + 12, '#aa88dd', 8);
+                if (inp.clickedIn(850, by, 160, 35)) {
+                    const result = game.fusion.fuse(item.id, inv);
+                    if (result.success) {
+                        game.audio.craft();
+                        game.particles.burst(1000, by + 15, 15, RarityColors[result.result.rarity] || '#fff', 3);
+                        game.notify(`Fused! ${result.result.icon} ${result.result.name} (${result.result.rarity})`, RarityColors[result.result.rarity] || '#fff');
+                        game.codex.discoverItem(result.result.id);
+                    } else {
+                        game.notify(result.error, '#ff4444');
+                    }
+                }
+                by += 42;
+            }
+
             if (item.effect && (item.category === 'potion' || item.category === 'food')) {
                 const useHover = inp.isOver(850, by, 160, 35);
                 r.button(850, by, 160, 35, `🧪 Use`, useHover);

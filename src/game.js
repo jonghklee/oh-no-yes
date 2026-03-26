@@ -25,6 +25,8 @@ class Game {
         this.tradeRoutes = new TradeRouteSystem();
         this.bank = new BankSystem();
         this.milestones = new MilestoneSystem();
+        this.luckySpin = new LuckySpinSystem();
+        this.fusion = new FusionSystem();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -195,6 +197,11 @@ class Game {
         const challenge = this.daily.generateChallenge(this.day, this.level);
         this.notify(`📋 Daily: ${challenge.name} - ${challenge.desc.replace('{target}', challenge.target)}`, '#44ddff', 5000);
 
+        // Lucky spin reminder
+        if (this.luckySpin.canSpin(this.day)) {
+            this.notify('🎰 Daily Lucky Spin available! Check Shop tab.', '#ff44ff');
+        }
+
         // Weekly boss challenge (every 7 days)
         if (this.day % 7 === 0 && this.level >= 5) {
             const weeklyBosses = Object.values(EnemyDB).filter(e => e.boss || e.miniBoss);
@@ -289,6 +296,26 @@ class Game {
         // Update systems
         this.particles.update();
         this.animations.update(dt);
+
+        // Lucky spin update
+        const spinResult = this.luckySpin.update(dt);
+        if (spinResult) {
+            // Apply spin result
+            if (spinResult.type === 'gold') { this.addGold(spinResult.value); }
+            if (spinResult.type === 'xp') { this.addXp(spinResult.value); }
+            if (spinResult.type === 'skillPoint') { this.skills.addPoints(spinResult.value); }
+            if (spinResult.type === 'item') { this.inventory.addItem(spinResult.item, spinResult.qty); }
+            if (spinResult.type === 'stamina') { this.exploration.restStamina(this.exploration.maxStamina); }
+            this.notify(`🎰 Lucky Spin: ${spinResult.name}!`, spinResult.color, 4000);
+            if (spinResult.value >= 500 || spinResult.type === 'skillPoint') {
+                this.audio.victory();
+                this.particles.burst(600, 400, 20, spinResult.color, 4);
+                this.renderer.shake(300);
+            } else {
+                this.audio.coin();
+                this.particles.sparkle(600, 400, spinResult.color);
+            }
+        }
 
         // Sell combo timer decay
         if (this._sellCombo && this._sellCombo.timer > 0) {
@@ -577,7 +604,9 @@ class Game {
             mystery: this.mystery.serialize(),
             tradeRoutes: this.tradeRoutes.serialize(),
             bank: this.bank.serialize(),
-            milestones: this.milestones.serialize()
+            milestones: this.milestones.serialize(),
+            luckySpin: this.luckySpin.serialize(),
+            fusion: this.fusion.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -617,6 +646,8 @@ class Game {
         if (data.tradeRoutes) this.tradeRoutes.deserialize(data.tradeRoutes);
         if (data.bank) this.bank.deserialize(data.bank);
         if (data.milestones) this.milestones.deserialize(data.milestones);
+        if (data.luckySpin) this.luckySpin.deserialize(data.luckySpin);
+        if (data.fusion) this.fusion.deserialize(data.fusion);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';
