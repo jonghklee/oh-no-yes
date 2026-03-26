@@ -256,14 +256,28 @@ class ExploreUI {
             }
         }
 
-        // Advance floor
+        // Advance floor + auto-advance option
         if (exploration.currentFloor < area.floors) {
-            const advHover = inp.isOver(250, 558, 200, 45);
-            r.button(250, 558, 200, 45, '⬆ Next Floor', advHover);
-            if (inp.clickedIn(250, 558, 200, 45)) {
+            const advHover = inp.isOver(250, 558, 150, 45);
+            r.button(250, 558, 150, 45, '⬆ Next Floor', advHover);
+            if (inp.clickedIn(250, 558, 150, 45)) {
                 exploration.advanceFloor();
                 game.audio.click();
                 game.quests.updateProgress('reachFloor', { area: area.id, floor: exploration.currentFloor });
+            }
+
+            // Skip to boss floor
+            if (exploration.currentFloor < area.bossFloor) {
+                const skipHover = inp.isOver(410, 558, 130, 45);
+                r.button(410, 558, 130, 45, `⏭ Floor ${area.bossFloor}`, skipHover, false, '#5a3020');
+                if (inp.clickedIn(410, 558, 130, 45)) {
+                    while (exploration.currentFloor < area.bossFloor) {
+                        exploration.advanceFloor();
+                    }
+                    game.audio.click();
+                    game.notify(`Skipped to Floor ${area.bossFloor}!`, '#ff8844');
+                    game.quests.updateProgress('reachFloor', { area: area.id, floor: exploration.currentFloor });
+                }
             }
         }
 

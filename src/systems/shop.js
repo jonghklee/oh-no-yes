@@ -17,9 +17,11 @@ class ShopSystem {
         this.autoSellEnabled = false;
         this.autoSellMinRarity = 'common';
         this.itemPopularity = {}; // { itemId: salesCount }
-        this.autoRestock = false; // auto-restock sold items from inventory
-        this.satisfactionChain = 0; // consecutive satisfied customers
+        this.autoRestock = false;
+        this.satisfactionChain = 0;
         this.bestChain = 0;
+        this.vipCustomers = {}; // { customerType: { visits, totalSpent } }
+        this.shopTheme = 'default'; // default, cozy, luxury, mystical, royal
     }
 
     addToDisplay(itemId, qty, inventory) {
@@ -153,6 +155,12 @@ class ShopSystem {
 
         // Track item popularity
         this.itemPopularity[neg.item.id] = (this.itemPopularity[neg.item.id] || 0) + 1;
+
+        // Track VIP customers
+        const vipKey = neg.customer.type;
+        if (!this.vipCustomers[vipKey]) this.vipCustomers[vipKey] = { visits: 0, totalSpent: 0 };
+        this.vipCustomers[vipKey].visits++;
+        this.vipCustomers[vipKey].totalSpent += price;
 
         // Customer satisfaction chain
         this.satisfactionChain++;
@@ -357,7 +365,12 @@ class ShopSystem {
             totalSales: this.totalSales,
             totalEarnings: this.totalEarnings,
             satisfiedCustomers: this.satisfiedCustomers,
-            shopLevel: this.shopLevel
+            shopLevel: this.shopLevel,
+            itemPopularity: this.itemPopularity,
+            autoRestock: this.autoRestock,
+            bestChain: this.bestChain,
+            vipCustomers: this.vipCustomers,
+            shopTheme: this.shopTheme
         };
     }
 
