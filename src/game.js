@@ -108,10 +108,31 @@ class Game {
     }
 
     addGold(amount) {
+        const prevGold = this.gold;
         this.gold += amount;
         this.totalGold += amount;
         this.quests.updateProgress('totalGold', { count: this.totalGold });
         this.quests.updateProgress('earnGold', { count: amount });
+
+        // Gold milestone celebrations
+        const milestones = [
+            { threshold: 1000, name: '1K Gold!', color: '#ffd700' },
+            { threshold: 5000, name: '5K Gold!', color: '#ffd700' },
+            { threshold: 10000, name: '10K Gold!', color: '#ff8844' },
+            { threshold: 50000, name: '50K Gold!', color: '#ff44ff' },
+            { threshold: 100000, name: '100K Gold!', color: '#ff44ff' },
+            { threshold: 500000, name: '500K Gold!', color: '#44ffff' },
+            { threshold: 1000000, name: 'MILLIONAIRE!', color: '#ffd700' },
+        ];
+        for (const m of milestones) {
+            if (prevGold < m.threshold && this.gold >= m.threshold) {
+                this.notify(`🎉 ${m.name} Total gold: ${Utils.formatGold(this.gold)}!`, m.color, 5000);
+                this.audio.victory();
+                this.particles.burst(600, 400, 20, m.color, 4);
+                this.renderer.flash(m.color, 200);
+                break;
+            }
+        }
     }
 
     spendGold(amount) {
@@ -532,6 +553,7 @@ class Game {
     handleCombatResult(result) {
         if (result.playerDefeated) {
             this.audio.defeat();
+            this._combatStreak = 0; // Reset streak on defeat
             if (this.endless.active) {
                 const endResult = this.endless.onDefeat();
                 this.notify(`Endless Dungeon: Cleared ${endResult.floorsCleared} floors!`, '#ff44ff');
@@ -551,11 +573,20 @@ class Game {
         const rewards = this.combat.getRewards();
         if (!rewards) return;
 
+        // Combat win streak
+        this._combatStreak = (this._combatStreak || 0) + 1;
+        const streakBonus = Math.min(this._combatStreak * 0.05, 0.5); // Up to 50% bonus
+        if (this._combatStreak >= 3 && this._combatStreak % 3 === 0) {
+            this.notify(`⚔ Win Streak x${this._combatStreak}! +${Math.round(streakBonus * 100)}% rewards!`, '#ff8844');
+            this.particles.burst(600, 300, 8, '#ff8844', 2);
+        }
+
         const bonuses = this.getSkillBonuses();
 
-        // Gold
+        // Gold (with streak bonus)
         let gold = rewards.gold;
         if (bonuses.goldBonus) gold = Math.round(gold * (1 + bonuses.goldBonus));
+        gold = Math.round(gold * (1 + streakBonus));
         this.addGold(gold);
         this.audio.coin();
 
