@@ -39,9 +39,12 @@ class ShopUI {
             }
         }
 
-        // Add item button / instructions
-        r.text('Right-click to remove items', 20, 280, '#666', 10);
-        r.text('Add items from inventory (tab 4)', 20, 295, '#666', 10);
+        // Chain indicator and popularity
+        if (shop.satisfactionChain > 0) {
+            r.text(`🔥 Chain: x${shop.satisfactionChain}`, 20, 280, shop.satisfactionChain >= 3 ? '#ff8844' : '#888', 11);
+            r.text(`Best: x${shop.bestChain}`, 140, 282, '#555', 9);
+        }
+        r.text('Right-click to remove | Add from Items tab', 20, 298, '#555', 9);
 
         // Quick add buttons for inventory items
         const sellableItems = game.inventory.getItemList().filter(item =>
@@ -134,6 +137,21 @@ class ShopUI {
                     game.trackDaily('earnGold', result.price);
                     game.notify(`Sold ${result.item.name} for ${result.price}g!`, '#44ff44');
                     game.renderer.shake(100);
+
+                    // Chain bonus
+                    if (result.chainBonus) {
+                        game.addGold(result.chainBonus.goldBonus);
+                        game.notify(`🔥 ${result.chainBonus.message} +${result.chainBonus.goldBonus}g`, '#ff8844');
+                        game.particles.burst(600, 450, 12, '#ff8844', 3);
+                    }
+
+                    // Auto-restock
+                    if (result.restocked && shop.autoRestock) {
+                        const itemId = result.item.id;
+                        if (game.inventory.hasItem(itemId, 1)) {
+                            shop.addToDisplay(itemId, 1, game.inventory);
+                        }
+                    }
                 }
             }
 
@@ -330,6 +348,30 @@ class ShopUI {
                     }
                 }
             });
+
+            // Auto-restock toggle
+            const arHover = inp.isOver(415, 738, 160, 20);
+            r.roundRect(415, 738, 160, 20, 3,
+                shop.autoRestock ? '#2a5a2a' : (arHover ? 'rgba(40,60,40,0.5)' : 'rgba(20,30,20,0.3)'),
+                shop.autoRestock ? '#44aa44' : '#444');
+            r.text(`📦 Auto-Restock: ${shop.autoRestock ? 'ON' : 'OFF'}`, 420, 741, shop.autoRestock ? '#88ff88' : '#888', 10);
+            if (inp.clickedIn(415, 738, 160, 20)) {
+                shop.autoRestock = !shop.autoRestock;
+                game.audio.click();
+                game.notify(`Auto-Restock ${shop.autoRestock ? 'enabled' : 'disabled'}`, '#44aaff');
+            }
+
+            // Top seller display
+            const topItems = Object.entries(shop.itemPopularity)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+            if (topItems.length > 0) {
+                r.text('🏆 Best Sellers:', 600, 740, '#888', 9);
+                topItems.forEach(([id, count], i) => {
+                    const item = ItemDB[id];
+                    if (item) r.text(`${item.icon}${item.name}(${count})`, 700 + i * 120, 740, '#ffd700', 9);
+                });
+            }
         }
     }
 }

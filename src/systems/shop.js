@@ -15,7 +15,11 @@ class ShopSystem {
         this.shopLevel = 1;
         this.activeNegotiation = null;
         this.autoSellEnabled = false;
-        this.autoSellMinRarity = 'common'; // auto-sell items of this rarity or lower
+        this.autoSellMinRarity = 'common';
+        this.itemPopularity = {}; // { itemId: salesCount }
+        this.autoRestock = false; // auto-restock sold items from inventory
+        this.satisfactionChain = 0; // consecutive satisfied customers
+        this.bestChain = 0;
     }
 
     addToDisplay(itemId, qty, inventory) {
@@ -147,16 +151,49 @@ class ShopSystem {
         this.dailyEarnings += price;
         this.satisfiedCustomers++;
 
+        // Track item popularity
+        this.itemPopularity[neg.item.id] = (this.itemPopularity[neg.item.id] || 0) + 1;
+
+        // Customer satisfaction chain
+        this.satisfactionChain++;
+        if (this.satisfactionChain > this.bestChain) this.bestChain = this.satisfactionChain;
+
+        // Chain bonus: satisfied customers bring friends (faster next customer)
+        let chainBonus = null;
+        if (this.satisfactionChain >= 3 && this.satisfactionChain % 3 === 0) {
+            chainBonus = {
+                type: 'referral',
+                message: `Customer chain x${this.satisfactionChain}! Referral bonus!`,
+                goldBonus: Math.round(price * 0.1 * (this.satisfactionChain / 3))
+            };
+            // Speed up next customer
+            this.customerTimer += this.customerInterval * 0.5;
+        }
+
         // Remove customer
         const custIdx = this.customers.findIndex(c => c.id === neg.customerId);
         if (custIdx !== -1) this.customers.splice(custIdx, 1);
+
+        // Auto-restock from inventory
+        let restocked = false;
+        if (this.autoRestock) {
+            const itemId = neg.item.id;
+            // Check if item still exists in display (quantity > 0)
+            const stillDisplayed = this.displayItems.find(d => d.id === itemId);
+            if (!stillDisplayed) {
+                // Try to restock from a hypothetical inventory reference
+                restocked = true; // Flag for external handling
+            }
+        }
 
         const result = {
             type: 'sold',
             item: neg.item,
             price,
             customer: neg.customer,
-            dialogue: Utils.choice(neg.customer.dialogue.buy)
+            dialogue: Utils.choice(neg.customer.dialogue[price >= neg.askPrice ? 'happy' : 'buy']),
+            chainBonus,
+            restocked
         };
 
         this.activeNegotiation = null;
@@ -251,6 +288,7 @@ class ShopSystem {
         const custIdx = this.customers.findIndex(c => c.id === neg.customerId);
         if (custIdx !== -1) this.customers.splice(custIdx, 1);
 
+        this.satisfactionChain = 0; // Chain broken
         const result = {
             type: 'rejected',
             dialogue: Utils.choice(neg.customer.dialogue.leave)
