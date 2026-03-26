@@ -91,6 +91,15 @@ class ShopUI {
         // === RIGHT PANEL: Customers ===
         r.panel(400, 55, 790, 340, '👥 Customers');
 
+        // Daily shop goal
+        const dailyGoal = Math.round(100 * game.level * (1 + game.day * 0.02));
+        const goalPct = Math.min(1, shop.dailyEarnings / dailyGoal);
+        r.text(`Daily Goal: ${shop.dailyEarnings}/${dailyGoal}g`, 1050, 58, goalPct >= 1 ? '#44ff44' : '#888', 9, 'right');
+        r.progressBar(1060, 60, 120, 6, goalPct, 1, goalPct >= 1 ? '#44ff44' : '#ffd700', '#222');
+        if (goalPct >= 1 && !shop._goalClaimed) {
+            r.text('🎁 Claim!', 1130, 68, '#ffd700', 8, 'center');
+        }
+
         if (shop.customers.length === 0 && !shop.activeNegotiation) {
             r.text('Waiting for customers...', 600, 170, '#666', 16, 'center');
             r.text(`Next customer in ~${Math.ceil((shop.customerInterval - shop.customerTimer) / 1000)}s`, 600, 200, '#555', 12, 'center');
@@ -150,6 +159,13 @@ class ShopUI {
             // Offer
             r.textBold(`Current Offer: ${neg.currentOffer}g`, 420, 520, '#ffd700', 16);
             r.text(`(${neg.haggleCount}/${neg.customer.maxHaggle} haggles)`, 620, 522, '#888', 11);
+
+            // Deal quality indicator
+            const baseValue = game.economy.getSellPrice(neg.item.id, 1.0, bonuses);
+            const dealPct = Math.round((neg.currentOffer / baseValue) * 100);
+            const dealColor = dealPct >= 120 ? '#44ff44' : dealPct >= 100 ? '#88ff88' : dealPct >= 80 ? '#ffaa44' : '#ff4444';
+            r.text(`Deal: ${dealPct}%`, 780, 522, dealColor, 11);
+            r.text(dealPct >= 120 ? '★★★' : dealPct >= 100 ? '★★' : dealPct >= 80 ? '★' : '✗', 830, 520, dealColor, 12);
 
             // Buttons
             const acceptHover = inp.isOver(420, 555, 120, 35);
