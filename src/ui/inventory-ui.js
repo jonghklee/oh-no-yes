@@ -99,7 +99,8 @@ class InventoryUI {
         r.text(`📦 Inv: ${Utils.formatGold(inventoryValue)}g | 🏦 Bank: ${Utils.formatGold(game.bank.deposits)}g`, 25, 638, '#888', 8);
 
         // === Main Inventory ===
-        r.panel(270, 55, 550, 700, `🎒 Inventory (${inv.getUsedSlots()}/${inv.maxSlots})`);
+        const totalItemCount = Object.values(inv.items).reduce((sum, item) => sum + (item.quantity || 1), 0);
+        r.panel(270, 55, 550, 700, `🎒 Inventory (${inv.getUsedSlots()}/${inv.maxSlots} types, ${totalItemCount} items)`);
 
         // Category filter
         const cats = ['all', 'material', 'potion', 'weapon', 'armor', 'accessory', 'food', 'gem', 'scroll', 'tool'];

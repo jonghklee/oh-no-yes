@@ -788,11 +788,14 @@ class QuestUI {
             r.textBold(quest.name, 680, avY + 5, '#fff', 12);
             r.text(quest.description, 620, avY + 28, '#aaa', 10);
 
-            // Rewards preview
+            // Rewards preview with icons
             const rewardText = [];
-            if (quest.rewards.gold) rewardText.push(`${quest.rewards.gold}g`);
-            if (quest.rewards.xp) rewardText.push(`${quest.rewards.xp} XP`);
-            r.text(`Rewards: ${rewardText.join(', ')}`, 620, avY + 42, '#ffd700', 9);
+            if (quest.rewards.gold) rewardText.push(`💰${quest.rewards.gold}g`);
+            if (quest.rewards.xp) rewardText.push(`⭐${quest.rewards.xp}`);
+            if (quest.rewards.reputation) rewardText.push(`🌟+${quest.rewards.reputation}`);
+            if (quest.rewards.skillPoints) rewardText.push(`🎯+${quest.rewards.skillPoints}SP`);
+            if (quest.rewards.items) rewardText.push(`🎁${quest.rewards.items.length} items`);
+            r.text(rewardText.join(' | '), 620, avY + 42, '#ffd700', 9);
 
             // Accept button
             const acceptHover = inp.isOver(1060, avY + 10, 100, 30);
