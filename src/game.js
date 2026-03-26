@@ -457,6 +457,26 @@ class Game {
             this.audio.setMood(targetMood);
         }
 
+        // Random shop micro-events (every ~45 seconds)
+        this._shopEventTimer = (this._shopEventTimer || 0) + dt;
+        if (this._shopEventTimer > 45000 && this.screen === 'shop' && Math.random() < 0.3) {
+            this._shopEventTimer = 0;
+            const events = [
+                { msg: '🎭 A street performer attracts crowds! +20% customer rate for 30s.', effect: () => { this.shop.customerTimer += this.shop.customerInterval * 0.5; } },
+                { msg: '💨 A gust of wind reveals a coin! +' + Utils.random(5, 20) * this.level + 'g', effect: () => { this.addGold(Utils.random(5, 20) * this.level); } },
+                { msg: '📦 A lost package arrives at your door!', effect: () => {
+                    const items = ['herb', 'iron_ore', 'wood', 'stone', 'leather', 'copper_ore'];
+                    const item = Utils.choice(items);
+                    this.inventory.addItem(item, Utils.random(2, 5));
+                    this.notify(`Found: ${ItemDB[item]?.icon} ${ItemDB[item]?.name}!`, '#44ff44');
+                }},
+                { msg: '⭐ A customer left a positive review! +3 reputation.', effect: () => { this.reputation.addReputation(3); } },
+            ];
+            const event = Utils.choice(events);
+            this.notify(event.msg, '#aaaaff', 3000);
+            event.effect();
+        }
+
         if (this.screen === 'shop') {
             const results = this.shop.update(dt, this.day, this.reputation.reputation, this.economy, this.getSkillBonuses());
             for (const r of results) {

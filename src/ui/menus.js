@@ -506,6 +506,27 @@ class ExploreUI {
                 }
                 break;
             }
+            case 'old_camp':
+            case 'hidden_path':
+            case 'echo_chamber':
+            case 'underground_lake': {
+                // Companion encounter - temporary combat buff
+                game.showDialog('You meet a wandering adventurer who offers to join you for a fight!', [
+                    { label: 'Accept (+5 ATK this battle)', action: () => {
+                        game.baseStats.atk += 5;
+                        game._tempBuff = true;
+                        game.notify('🤝 Companion joins! +5 ATK for next battle!', '#44ffff');
+                        game.dismissDialog();
+                    }},
+                    { label: 'Trade supplies', action: () => {
+                        const gold = Utils.random(20, 80) * game.level;
+                        game.addGold(gold);
+                        game.notify(`💰 Traded for ${gold}g!`, '#ffd700');
+                        game.dismissDialog();
+                    }}
+                ]);
+                break;
+            }
             default:
                 game.addXp(Utils.random(5, 15) * game.level);
                 game.notify(`Discovered: ${eventType.replace(/_/g, ' ')} (+XP)`, '#aaaaff');
