@@ -323,6 +323,13 @@ class Game {
         this.quests.autoAcceptMainQuests();
         this.reputation.addReputation(1);
 
+        // Monthly bonus (first day of each month/season)
+        if (getDayInSeason(this.day) === 1) {
+            const monthBonus = Math.round(100 * this.level * (1 + this.day * 0.01));
+            this.addGold(monthBonus);
+            this.notify(`🗓 New Month! Monthly bonus: +${monthBonus}g`, '#44ddff', 4000);
+        }
+
         // Secret events on special days
         if (this.day === 100) {
             this.notify('🌟 Day 100! A mysterious merchant appears...', '#ff44ff', 5000);

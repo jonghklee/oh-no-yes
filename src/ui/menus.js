@@ -145,6 +145,12 @@ class ExploreUI {
                 game.audio.discover();
             }
         }
+
+        // Endless Dungeon leaderboard mini-display
+        if (game.endless.highestFloor > 0) {
+            r.roundRect(20, 705, 300, 22, 3, 'rgba(30,15,40,0.5)', '#5a3090');
+            r.text(`🏰 Endless Record: F${game.endless.highestFloor} | Runs: ${game.endless.totalRuns} | Best Streak: ${game.endless.bestStreak}`, 30, 709, '#aa88ff', 9);
+        }
     }
 
     static renderExploration(game) {
@@ -289,6 +295,28 @@ class ExploreUI {
             const itemCount = results.items.length;
             game.notify(`Exploration complete! Floor ${results.floorsExplored}, ${itemCount} items gathered.`, '#44ddff', 4000);
             game.audio.click();
+        }
+
+        // Boss rechallenge (when on boss floor and boss was already defeated)
+        const bossEnemy = area.enemies.find(e => EnemyDB[e]?.boss);
+        if (bossEnemy && exploration.bossesDefeated.has(bossEnemy) && exploration.currentFloor >= area.bossFloor) {
+            const bossData = EnemyDB[bossEnemy];
+            const rechHover = inp.isOver(250, 620, 200, 40);
+            r.button(250, 620, 200, 40, `👑 Rechallenge ${bossData.name}`, rechHover, false, '#5a4020');
+            if (inp.clickedIn(250, 620, 200, 40)) {
+                // Scale boss for rechallenge (stronger than original)
+                const scaledBoss = Utils.deepClone(bossData);
+                const rechScale = 1.5 + (game.level * 0.1);
+                scaledBoss.hp = Math.round(scaledBoss.hp * rechScale);
+                scaledBoss.atk = Math.round(scaledBoss.atk * rechScale);
+                scaledBoss.def = Math.round(scaledBoss.def * rechScale);
+                scaledBoss.xp = Math.round(scaledBoss.xp * 2);
+                scaledBoss.gold = [scaledBoss.gold[0] * 2, scaledBoss.gold[1] * 2];
+                scaledBoss.name = `Empowered ${scaledBoss.name}`;
+                game.combat.startBattle(game.getPlayerStats(), scaledBoss);
+                game.switchScreen('combat');
+                game.notify(`👑 Boss Rechallenge: ${scaledBoss.name}! 2x rewards!`, '#ffd700', 4000);
+            }
         }
 
         // Quick actions
