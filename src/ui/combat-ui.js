@@ -296,10 +296,24 @@ class CombatUI {
             // Show enemy name
             r.text(`${combat.enemy.name} defeated!`, 600, 330, '#aaa', 14, 'center');
 
-            // Reward preview
+            // Reward preview with drop icons
             const enemy = combat.enemy;
             const goldPreview = `~${Utils.random(enemy.gold[0], enemy.gold[1])}g`;
-            r.text(`🪙 ${goldPreview}  ⭐ ${enemy.xp} XP`, 600, 355, '#ffd700', 12, 'center');
+            r.text(`🪙 ${goldPreview}  ⭐ ${enemy.xp} XP`, 600, 350, '#ffd700', 12, 'center');
+
+            // Show potential drops
+            if (enemy.drops && enemy.drops.length > 0) {
+                const dropPreview = enemy.drops.slice(0, 4).map(d => {
+                    const item = ItemDB[d.item];
+                    return item ? `${item.icon}` : '';
+                }).filter(Boolean).join(' ');
+                r.text(`Drops: ${dropPreview}`, 600, 370, '#aaa', 10, 'center');
+            }
+
+            // Win streak display
+            if (game._combatStreak > 1) {
+                r.text(`🔥 Win Streak: ${game._combatStreak}`, 600, 388, '#ff8844', 10, 'center');
+            }
 
             const collectHover = inp.isOver(500, 390, 200, 45);
             r.button(500, 390, 200, 45, '💰 Collect Rewards', collectHover);
