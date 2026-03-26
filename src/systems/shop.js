@@ -184,6 +184,18 @@ class ShopSystem {
             this.customerTimer += this.customerInterval * 0.5;
         }
 
+        // Customer tip (happy customers leave tips)
+        let tip = 0;
+        if (price >= neg.askPrice && Math.random() < 0.25) {
+            tip = Math.round(price * Utils.randomFloat(0.05, 0.15));
+        }
+
+        // Track best single sale
+        if (!this.bestSalePrice || price > this.bestSalePrice) {
+            this.bestSalePrice = price;
+            this.bestSaleItem = neg.item.name;
+        }
+
         // Remove customer
         const custIdx = this.customers.findIndex(c => c.id === neg.customerId);
         if (custIdx !== -1) this.customers.splice(custIdx, 1);
@@ -207,7 +219,8 @@ class ShopSystem {
             customer: neg.customer,
             dialogue: Utils.choice(neg.customer.dialogue[price >= neg.askPrice ? 'happy' : 'buy']),
             chainBonus,
-            restocked
+            restocked,
+            tip
         };
 
         this.activeNegotiation = null;

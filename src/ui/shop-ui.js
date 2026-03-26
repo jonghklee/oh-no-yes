@@ -234,6 +234,13 @@ class ShopUI {
                         game.particles.burst(600, 450, 12, '#ff8844', 3);
                     }
 
+                    // Customer tip
+                    if (result.tip > 0) {
+                        game.addGold(result.tip);
+                        game.notify(`💝 Tip! +${result.tip}g`, '#ff88ff');
+                        game.particles.sparkle(600, 520, '#ff88ff');
+                    }
+
                     // Auto-restock
                     if (result.restocked && shop.autoRestock) {
                         const itemId = result.item.id;
@@ -316,9 +323,12 @@ class ShopUI {
         r.text(`Total Earnings: ${Utils.formatGold(shop.totalEarnings)}g`, 25, 705, '#aaa', 11);
         r.text(`Tax Rate: ${Math.round(game.economy.getEffectiveTaxRate(bonuses) * 100)}%`, 25, 725, '#ff8888', 11);
 
-        // Shop rating stars
+        // Shop rating stars + best sale
         const shopStars = shop.totalSales >= 500 ? 5 : shop.totalSales >= 200 ? 4 : shop.totalSales >= 50 ? 3 : shop.totalSales >= 10 ? 2 : shop.totalSales >= 1 ? 1 : 0;
         r.text('★'.repeat(shopStars) + '☆'.repeat(5 - shopStars), 25, 740, '#ffd700', 10);
+        if (shop.bestSalePrice) {
+            r.text(`Best: ${shop.bestSalePrice}g`, 120, 742, '#888', 8);
+        }
 
         // Skip day button
         const skipHover = inp.isOver(200, 710, 170, 30);
