@@ -61,6 +61,17 @@ class HUD {
             game.notify('Game saved!', '#44ff44');
         }
 
+        // Daily challenge mini-display
+        const dc = game.daily.currentChallenge;
+        if (dc && !game.daily.completedToday) {
+            r.roundRect(1000, 2, 40, 40, 4, 'rgba(30,60,80,0.8)', '#44ddff');
+            r.text('📋', 1010, 8, '#fff', 16);
+            r.text(`${dc.progress}/${dc.target}`, 1020, 26, '#44ddff', 8, 'center');
+        } else if (dc && game.daily.completedToday) {
+            r.roundRect(1000, 2, 40, 40, 4, 'rgba(30,80,30,0.8)', '#44ff44');
+            r.text('✅', 1010, 10, '#fff', 16);
+        }
+
         // Active events banner
         if (game.economy.activeEvents.length > 0) {
             r.gradientRect(0, 44, 1200, 22, 'rgba(40,20,60,0.8)', 'rgba(40,20,60,0.3)');

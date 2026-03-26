@@ -59,4 +59,76 @@ class AudioSystem {
     }
     coin() { this.play('triangle', 1200, 0.05, 0.2); this.play('triangle', 1500, 0.05, 0.15); }
     discover() { this.play('sine', 600, 0.15, 0.25); this.play('sine', 750, 0.15, 0.2); }
+
+    // === AMBIENT MUSIC SYSTEM ===
+    startMusic(mood = 'shop') {
+        if (!this.enabled || !this.ctx) return;
+        this.stopMusic();
+        this.musicMood = mood;
+        this.musicPlaying = true;
+        this._playMusicLoop();
+    }
+
+    stopMusic() {
+        this.musicPlaying = false;
+        if (this._musicTimeout) clearTimeout(this._musicTimeout);
+    }
+
+    _playMusicLoop() {
+        if (!this.musicPlaying || !this.ctx) return;
+
+        const moods = {
+            shop: { scale: [261, 294, 330, 349, 392, 440, 494], tempo: 2000, type: 'sine', vol: 0.06 },
+            combat: { scale: [196, 220, 247, 262, 294, 330, 370], tempo: 800, type: 'sawtooth', vol: 0.05 },
+            explore: { scale: [330, 370, 415, 440, 494, 554, 622], tempo: 1500, type: 'triangle', vol: 0.05 },
+            title: { scale: [262, 330, 392, 494, 524, 660, 784], tempo: 2500, type: 'sine', vol: 0.04 }
+        };
+
+        const m = moods[this.musicMood] || moods.shop;
+
+        // Play a note from the scale
+        const note = m.scale[Math.floor(Math.random() * m.scale.length)];
+        const duration = Utils.randomFloat(0.3, 0.8);
+
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = m.type;
+            osc.frequency.value = note;
+            gain.gain.value = 0;
+            gain.gain.linearRampToValueAtTime(m.vol * this.volume, this.ctx.currentTime + 0.05);
+            gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+
+        // Occasionally play a harmony
+        if (Math.random() < 0.3) {
+            const harmony = m.scale[Math.floor(Math.random() * m.scale.length)] * 0.5;
+            try {
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.value = harmony;
+                gain2.gain.value = 0;
+                gain2.gain.linearRampToValueAtTime(m.vol * 0.3 * this.volume, this.ctx.currentTime + 0.1);
+                gain2.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration * 1.5);
+                osc2.connect(gain2);
+                gain2.connect(this.ctx.destination);
+                osc2.start();
+                osc2.stop(this.ctx.currentTime + duration * 1.5);
+            } catch(e) {}
+        }
+
+        const nextDelay = Utils.random(m.tempo * 0.7, m.tempo * 1.3);
+        this._musicTimeout = setTimeout(() => this._playMusicLoop(), nextDelay);
+    }
+
+    setMood(mood) {
+        if (this.musicMood !== mood && this.musicPlaying) {
+            this.startMusic(mood);
+        }
+    }
 }

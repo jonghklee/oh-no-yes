@@ -19,6 +19,7 @@ class Game {
         this.reputation = new ReputationSystem();
         this.quests = new QuestSystem();
         this.endless = new EndlessDungeon();
+        this.daily = new DailyChallengeSystem();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -141,6 +142,10 @@ class Game {
         this.shop.newDay();
         this.exploration.newDay();
 
+        // Generate daily challenge
+        const challenge = this.daily.generateChallenge(this.day, this.level);
+        this.notify(`📋 Daily: ${challenge.name} - ${challenge.desc.replace('{target}', challenge.target)}`, '#44ddff', 5000);
+
         // Check for events
         for (const event of this.economy.activeEvents) {
             if (event.effects.instantGold) {
@@ -194,6 +199,14 @@ class Game {
         // Update systems
         this.particles.update();
         this.animations.update(dt);
+
+        // Music mood based on screen
+        const moodMap = { shop: 'shop', craft: 'shop', inventory: 'shop', skills: 'shop',
+                          explore: 'explore', map: 'shop', quest: 'shop', combat: 'combat', title: 'title' };
+        const targetMood = moodMap[this.screen] || 'shop';
+        if (this.audio.musicPlaying) {
+            this.audio.setMood(targetMood);
+        }
 
         if (this.screen === 'shop') {
             const results = this.shop.update(dt, this.day, this.reputation.reputation, this.economy, this.getSkillBonuses());
@@ -322,11 +335,12 @@ class Game {
         // Quest progress
         this.quests.updateProgress('defeatBoss', { boss: this.combat.enemy?.id });
 
-        // Reputation
+        // Reputation & daily progress
         if (rewards.isBoss) {
             this.reputation.addReputation(10);
             this.audio.victory();
         }
+        this.trackDaily('defeat', 1);
 
         // Return to exploration or endless dungeon
         if (this.endless.active) {
@@ -361,6 +375,22 @@ class Game {
         this.audio.click();
     }
 
+    trackDaily(type, amount = 1) {
+        if (!this.daily.currentChallenge) return;
+        const completed = this.daily.addProgress(type, amount);
+        if (completed) {
+            const reward = this.daily.currentChallenge.reward;
+            this.addGold(reward.gold);
+            this.addXp(reward.xp);
+            if (reward.bonus === 'skillPoint') {
+                this.skills.addPoints(1);
+                this.notify('🎁 Streak bonus: +1 Skill Point!', '#ff44ff');
+            }
+            this.notify(`📋 Daily Challenge Complete! +${reward.gold}g, +${reward.xp}XP`, '#44ddff', 4000);
+            this.audio.victory();
+        }
+    }
+
     sellItem(itemId) {
         const bonuses = this.getSkillBonuses();
         const price = this.economy.getSellPrice(itemId, 1.0, bonuses);
@@ -372,6 +402,8 @@ class Game {
         this.quests.updateProgress('totalSales', { count: this.shop.totalSales + 1 });
         this.reputation.addReputation(1);
         this.particles.goldGain(600, 400, price);
+        this.trackDaily('sell', 1);
+        this.trackDaily('earnGold', price);
         return true;
     }
 
@@ -399,7 +431,8 @@ class Game {
             enchantment: this.enchantment.serialize(),
             prestige: this.prestige.serialize(),
             endless: this.endless.serialize(),
-            achievements: this.achievements.serialize()
+            achievements: this.achievements.serialize(),
+            daily: this.daily.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -432,9 +465,12 @@ class Game {
         if (data.prestige) this.prestige.deserialize(data.prestige);
         if (data.endless) this.endless.deserialize(data.endless);
         if (data.achievements) this.achievements.deserialize(data.achievements);
+        if (data.daily) this.daily.deserialize(data.daily);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';
+        this.audio.init();
+        this.audio.startMusic('shop');
         return true;
     }
 
@@ -451,6 +487,7 @@ class Game {
         this.economy.updatePrices(1);
         this.screen = 'shop';
         this.audio.init();
+        this.audio.startMusic('shop');
 
         // Apply prestige bonuses
         if (this.prestigeLevel > 0) {
