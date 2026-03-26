@@ -220,7 +220,7 @@ class Game {
         }
 
         if (this.screen === 'craft') {
-            const result = this.crafting.update(dt);
+            const result = this.crafting.update(dt, this.inventory, this.getSkillBonuses());
             if (result) {
                 this.inventory.addItem(result.itemId, result.qty);
                 this.notify(`Crafted ${ItemDB[result.itemId]?.name || result.itemId} x${result.qty}!`, '#44aaff');

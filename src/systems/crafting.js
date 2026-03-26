@@ -56,12 +56,46 @@ class CraftingSystem {
         return { can: true, started: true };
     }
 
-    update(dt) {
-        if (!this.currentCraft) return null;
+    queueCraft(recipeId, count, inventory, skillBonuses = {}) {
+        for (let i = 0; i < count; i++) {
+            this.craftQueue.push({ recipe: recipeId, bonuses: skillBonuses });
+        }
+        // Start first if not crafting
+        if (!this.currentCraft) {
+            return this.startNextFromQueue(inventory, skillBonuses);
+        }
+        return { can: true, queued: count };
+    }
 
-        this.currentCraft.timeRemaining -= dt / 1000; // dt in ms, time in seconds
+    startNextFromQueue(inventory, skillBonuses) {
+        if (this.craftQueue.length === 0) return null;
+        const next = this.craftQueue[0];
+        const result = this.startCraft(next.recipe, inventory, next.bonuses || skillBonuses);
+        if (result.can) {
+            this.craftQueue.shift();
+        } else {
+            this.craftQueue = []; // Clear queue if can't continue
+        }
+        return result;
+    }
+
+    update(dt, inventory, skillBonuses) {
+        if (!this.currentCraft) {
+            // Try next in queue
+            if (this.craftQueue.length > 0 && inventory) {
+                this.startNextFromQueue(inventory, skillBonuses);
+            }
+            return null;
+        }
+
+        this.currentCraft.timeRemaining -= dt / 1000;
         if (this.currentCraft.timeRemaining <= 0) {
-            return this.completeCraft();
+            const result = this.completeCraft();
+            // Auto-start next queue item
+            if (this.craftQueue.length > 0 && inventory) {
+                this.startNextFromQueue(inventory, skillBonuses);
+            }
+            return result;
         }
         return null;
     }

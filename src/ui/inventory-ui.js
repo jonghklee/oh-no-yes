@@ -229,5 +229,54 @@ class InventoryUI {
         } else {
             r.text('Select an item', 1010, 400, '#666', 13, 'center');
         }
+
+        // Bulk sell buttons at bottom
+        r.roundRect(835, 700, 350, 45, 6, 'rgba(30,15,50,0.5)', '#3d1e6d');
+        r.text('Quick Sell:', 850, 708, '#888', 10);
+
+        // Sell all common materials
+        const scHover = inp.isOver(850, 718, 100, 22);
+        r.button(850, 718, 100, 22, '💰 Common', scHover, false, '#4a3020');
+        if (inp.clickedIn(850, 718, 100, 22)) {
+            let totalSold = 0;
+            const toSell = inv.getItemsByCategory('material').filter(i => i.rarity === 'common' && i.basePrice > 0);
+            for (const item of toSell) {
+                const qty = item.quantity;
+                for (let s = 0; s < qty; s++) {
+                    game.sellItem(item.id);
+                    totalSold++;
+                }
+            }
+            if (totalSold > 0) game.notify(`Sold ${totalSold} common materials!`, '#ffd700');
+        }
+
+        // Sell all uncommon materials
+        const suHover = inp.isOver(960, 718, 110, 22);
+        r.button(960, 718, 110, 22, '💰 Uncommon', suHover, false, '#2a4a20');
+        if (inp.clickedIn(960, 718, 110, 22)) {
+            let totalSold = 0;
+            const toSell = inv.getItemsByCategory('material').filter(i => i.rarity === 'uncommon' && i.basePrice > 0);
+            for (const item of toSell) {
+                const qty = item.quantity;
+                for (let s = 0; s < qty; s++) {
+                    game.sellItem(item.id);
+                    totalSold++;
+                }
+            }
+            if (totalSold > 0) game.notify(`Sold ${totalSold} uncommon materials!`, '#ffd700');
+        }
+
+        // Stock all to shop
+        const saHover = inp.isOver(1080, 718, 100, 22);
+        r.button(1080, 718, 100, 22, '🏪 Stock All', saHover, false, '#2a2a5a');
+        if (inp.clickedIn(1080, 718, 100, 22)) {
+            let stocked = 0;
+            const sellable = inv.getItemList().filter(i => i.basePrice > 0 && !i.quest);
+            for (const item of sellable) {
+                if (game.shop.addToDisplay(item.id, 1, inv)) stocked++;
+                if (game.shop.displayItems.length >= game.shop.maxDisplay) break;
+            }
+            if (stocked > 0) game.notify(`Stocked ${stocked} items to shop!`, '#44aaff');
+        }
     }
 }

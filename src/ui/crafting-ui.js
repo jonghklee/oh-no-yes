@@ -154,19 +154,44 @@ class CraftingUI {
                 r.text(`Time: ${time}s`, 730, 350, '#aaa', 11);
                 r.text(`XP: ${recipe.xp}`, 830, 350, '#4488ff', 11);
 
-                // Craft button
+                // Craft buttons
                 const canCraft = crafting.canCraft(recipe.id, game.inventory);
-                const craftHover = inp.isOver(730, 380, 200, 40);
                 const isCrafting = crafting.currentCraft !== null;
-                r.button(730, 380, 200, 40, isCrafting ? '⏳ Crafting...' : '🔨 Craft', craftHover, !canCraft.can || isCrafting);
 
-                if (!isCrafting && canCraft.can && inp.clickedIn(730, 380, 200, 40)) {
-                    crafting.startCraft(recipe.id, game.inventory, bonuses);
+                // Craft x1
+                const craft1Hover = inp.isOver(730, 380, 120, 36);
+                r.button(730, 380, 120, 36, isCrafting ? '⏳ Crafting...' : '🔨 Craft x1', craft1Hover, !canCraft.can && !isCrafting);
+                if (canCraft.can && inp.clickedIn(730, 380, 120, 36)) {
+                    if (isCrafting) {
+                        crafting.queueCraft(recipe.id, 1, game.inventory, bonuses);
+                        game.notify('Added to queue', '#44aaff');
+                    } else {
+                        crafting.startCraft(recipe.id, game.inventory, bonuses);
+                    }
                     game.audio.click();
                 }
 
-                if (!canCraft.can) {
-                    r.text(canCraft.reason, 730, 425, '#ff6666', 11);
+                // Craft x5
+                const craft5Hover = inp.isOver(860, 380, 80, 36);
+                r.button(860, 380, 80, 36, 'x5', craft5Hover, !canCraft.can);
+                if (canCraft.can && inp.clickedIn(860, 380, 80, 36)) {
+                    if (isCrafting) {
+                        crafting.queueCraft(recipe.id, 5, game.inventory, bonuses);
+                    } else {
+                        crafting.startCraft(recipe.id, game.inventory, bonuses);
+                        crafting.queueCraft(recipe.id, 4, game.inventory, bonuses);
+                    }
+                    game.audio.click();
+                    game.notify('Queued 5 crafts!', '#44aaff');
+                }
+
+                // Queue indicator
+                if (crafting.craftQueue.length > 0) {
+                    r.text(`Queue: ${crafting.craftQueue.length} remaining`, 730, 420, '#44aaff', 10);
+                }
+
+                if (!canCraft.can && !isCrafting) {
+                    r.text(canCraft.reason, 730, 420, '#ff6666', 11);
                 }
             }
         } else {
