@@ -194,6 +194,21 @@ class Game {
         const challenge = this.daily.generateChallenge(this.day, this.level);
         this.notify(`📋 Daily: ${challenge.name} - ${challenge.desc.replace('{target}', challenge.target)}`, '#44ddff', 5000);
 
+        // Weekly boss challenge (every 7 days)
+        if (this.day % 7 === 0 && this.level >= 5) {
+            const weeklyBosses = Object.values(EnemyDB).filter(e => e.boss || e.miniBoss);
+            const weeklyBoss = Utils.choice(weeklyBosses);
+            if (weeklyBoss) {
+                this.weeklyBoss = Utils.deepClone(weeklyBoss);
+                this.weeklyBoss.hp = Math.round(this.weeklyBoss.hp * (1.5 + this.day * 0.01));
+                this.weeklyBoss.atk = Math.round(this.weeklyBoss.atk * (1.3 + this.day * 0.005));
+                this.weeklyBoss.name = `⭐ Weekly: ${this.weeklyBoss.name}`;
+                this.weeklyBoss.xp *= 5;
+                this.weeklyBoss.gold = [this.weeklyBoss.gold[0] * 5, this.weeklyBoss.gold[1] * 5];
+                this.notify('⭐ Weekly Boss Challenge available! Check Explore tab.', '#ff44ff', 5000);
+            }
+        }
+
         // Check for events
         for (const event of this.economy.activeEvents) {
             if (event.effects.instantGold) {

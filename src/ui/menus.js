@@ -130,6 +130,21 @@ class ExploreUI {
         } else if (game.level >= 5) {
             r.text('🏰 Endless Dungeon unlocks at Lv.10', 700, 725, '#555', 11);
         }
+
+        // Weekly boss challenge
+        if (game.weeklyBoss) {
+            r.roundRect(1020, 715, 170, 35, 6, 'rgba(80,60,20,0.7)', '#ffd700', 2);
+            r.textBold('⭐ Weekly Boss', 1035, 720, '#ffd700', 12);
+            const wbHover = inp.isOver(1020, 715, 170, 35);
+            if (wbHover) r.roundRect(1020, 715, 170, 35, 6, 'rgba(120,90,30,0.5)');
+            if (inp.clickedIn(1020, 715, 170, 35)) {
+                game.combat.startBattle(game.getPlayerStats(), game.weeklyBoss);
+                game.switchScreen('combat');
+                game.notify(`Fighting ${game.weeklyBoss.name}! 5x rewards!`, '#ffd700', 4000);
+                game.weeklyBoss = null; // One attempt per week
+                game.audio.discover();
+            }
+        }
     }
 
     static renderExploration(game) {
@@ -209,20 +224,48 @@ class ExploreUI {
         // Gathered items panel
         r.panel(620, 115, 570, 640, '💎 Gathered Items');
         const gathered = {};
+        let totalLootValue = 0;
         for (const g of exploration.gatheredItems) {
             if (gathered[g.item]) gathered[g.item] += g.qty;
             else gathered[g.item] = g.qty;
         }
         let gy = 150;
+        let uniqueItems = 0;
         for (const [itemId, qty] of Object.entries(gathered)) {
             const item = ItemDB[itemId];
-            if (item && gy < 730) {
+            if (item && gy < 710) {
+                const value = (item.basePrice || 0) * qty;
+                totalLootValue += value;
+                uniqueItems++;
                 r.text(`${item.icon} ${item.name} x${qty}`, 640, gy, RarityColors[item.rarity], 12);
+                r.text(`${value}g`, 1150, gy, '#ffd700', 10, 'right');
                 gy += 22;
             }
         }
         if (Object.keys(gathered).length === 0) {
             r.text('Nothing gathered yet...', 700, 300, '#666', 13);
+        } else {
+            // Loot summary
+            r.line(640, gy + 5, 1160, gy + 5, '#3d1e6d');
+            r.textBold(`Total Value: ${Utils.formatGold(totalLootValue)}g`, 640, gy + 10, '#ffd700', 13);
+            r.text(`${uniqueItems} unique items`, 900, gy + 12, '#888', 10);
+
+            // Quick sell all button
+            const sellAllHover = inp.isOver(640, gy + 35, 200, 30);
+            r.button(640, gy + 35, 200, 30, `💰 Sell All (${Utils.formatGold(totalLootValue)}g)`, sellAllHover, false, '#5a5020');
+            if (inp.clickedIn(640, gy + 35, 200, 30)) {
+                let totalSold = 0;
+                for (const [itemId, qty] of Object.entries(gathered)) {
+                    for (let s = 0; s < qty; s++) {
+                        if (game.inventory.hasItem(itemId, 1)) {
+                            game.sellItem(itemId);
+                            totalSold++;
+                        }
+                    }
+                }
+                game.notify(`Sold ${totalSold} gathered items!`, '#ffd700');
+                game.particles.goldGain(900, gy + 50, totalLootValue);
+            }
         }
     }
 
