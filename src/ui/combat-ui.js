@@ -357,9 +357,14 @@ class CombatUI {
                 r.text(`Drops: ${dropPreview}`, 600, 370, '#aaa', 10, 'center');
             }
 
-            // Win streak display
+            // Win streak + level up preview
             if (game._combatStreak > 1) {
-                r.text(`🔥 Win Streak: ${game._combatStreak}`, 600, 388, '#ff8844', 10, 'center');
+                r.text(`🔥 Win Streak: ${game._combatStreak}`, 600, 386, '#ff8844', 10, 'center');
+            }
+            // Level up check
+            const xpAfter = game.xp + enemy.xp;
+            if (xpAfter >= getXpForLevel(game.level)) {
+                r.text(`⬆ LEVEL UP! → Lv.${game.level + 1}`, 600, 400, '#ffd700', 11, 'center');
             }
 
             const collectHover = inp.isOver(500, 390, 200, 45);
