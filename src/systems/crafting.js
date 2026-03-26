@@ -51,9 +51,18 @@ class CraftingSystem {
             inventory.removeItem(ing.item, consumed);
         }
 
-        // Calculate craft time
+        // Calculate craft time with chain bonus
         let time = recipe.time;
         if (skillBonuses.craftSpeed) time = Math.max(1, Math.round(time * skillBonuses.craftSpeed));
+
+        // Chain crafting bonus: same recipe in a row = faster
+        if (this._lastRecipe === recipeId) {
+            this._craftChain = Math.min((this._craftChain || 0) + 1, 5);
+            time = Math.max(1, Math.round(time * (1 - this._craftChain * 0.08))); // Up to 40% faster
+        } else {
+            this._craftChain = 0;
+        }
+        this._lastRecipe = recipeId;
 
         this.currentCraft = {
             recipe: recipeId,

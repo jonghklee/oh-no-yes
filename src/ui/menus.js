@@ -534,6 +534,51 @@ class ExploreUI {
                 ]);
                 break;
             }
+            case 'fairy_ring':
+            case 'moonwell':
+            case 'enchanted_tree': {
+                // Rare magical event - choice of permanent minor buff
+                game.showDialog('You discover a source of ancient magic! Choose a blessing:', [
+                    { label: '+2 Max HP', action: () => {
+                        game.baseStats.maxHp += 2;
+                        game.notify('💫 Blessed! +2 Max HP permanently!', '#ff44ff');
+                        game.dismissDialog();
+                    }},
+                    { label: '+1 ATK', action: () => {
+                        game.baseStats.atk += 1;
+                        game.notify('💫 Blessed! +1 ATK permanently!', '#ff44ff');
+                        game.dismissDialog();
+                    }},
+                ]);
+                break;
+            }
+            case 'dragon_nest':
+            case 'lava_pool': {
+                const treasureGold = Utils.random(200, 800) * game.level;
+                game.addGold(treasureGold);
+                game.inventory.addItem('dragon_scale', 1);
+                game.notify(`🐉 Dragon's treasure! +${treasureGold}g + Dragon Scale!`, '#ff4444');
+                break;
+            }
+            case 'void_rift':
+            case 'reality_fragment': {
+                game.inventory.addItem('void_essence', Utils.random(1, 3));
+                game.addXp(100 * game.level);
+                game.notify('🌀 Void energy absorbed! +Void Essence +XP!', '#aa44ff');
+                break;
+            }
+            case 'cosmic_forge': {
+                // Ultra rare - free enhancement
+                game.notify('⚡ Cosmic Forge found! Your weapon grows stronger!', '#44ffff');
+                if (game.inventory.equipment.weapon) {
+                    const wep = game.inventory.equipment.weapon;
+                    wep.stats.atk = (wep.stats.atk || 0) + 3;
+                    game.notify(`${wep.icon} ${wep.name}: ATK +3!`, '#44ffff');
+                } else {
+                    game.addGold(500 * game.level);
+                }
+                break;
+            }
             default:
                 game.addXp(Utils.random(5, 15) * game.level);
                 game.notify(`Discovered: ${eventType.replace(/_/g, ' ')} (+XP)`, '#aaaaff');
