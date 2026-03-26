@@ -171,11 +171,16 @@ class ShopUI {
                 }
             }
 
+            // Customer mood emoji
+            const moodPct = customer.currentPatience / customer.maxPatience;
+            const moodEmoji = moodPct > 0.7 ? '😊' : moodPct > 0.4 ? '😐' : moodPct > 0.2 ? '😠' : '💢';
+            r.text(moodEmoji, cx + 210, cy + 10, '#fff', 14);
+
             // Patience bar
             r.text('Patience:', cx + 10, cy + 75, '#888', 9);
             r.progressBar(cx + 70, cy + 75, 100, 10,
                 customer.currentPatience, customer.maxPatience,
-                customer.currentPatience <= 1 ? '#ff4444' : '#44aa44');
+                moodPct > 0.5 ? '#44aa44' : moodPct > 0.25 ? '#aaaa44' : '#ff4444');
 
             // Browsing indicator
             if (!isActive) {
