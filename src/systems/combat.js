@@ -190,6 +190,43 @@ class CombatSystem {
         return true;
     }
 
+    playerUseScroll(scrollItem) {
+        if (this.state !== 'playerTurn' || this.animating) return null;
+        if (!scrollItem || !scrollItem.effect) return null;
+
+        const effect = scrollItem.effect;
+        if (effect.type !== 'damage') return null;
+
+        let damage = effect.value || 25;
+
+        // Elemental weakness check
+        const weaknesses = { fire: 'ice', ice: 'nature', nature: 'fire', dark: 'nature' };
+        const isWeak = this.enemy.element && weaknesses[this.enemy.element] === effect.element;
+        const isStrong = this.enemy.element === effect.element;
+
+        if (isWeak) {
+            damage *= 2;
+            this.addLog(`${effect.element} scroll! Super effective! ${damage} damage!`);
+        } else if (isStrong) {
+            damage = Math.round(damage * 0.5);
+            this.addLog(`${effect.element} scroll... Not very effective. ${damage} damage.`);
+        } else {
+            this.addLog(`${effect.element} scroll! ${damage} damage!`);
+        }
+
+        this.enemy.currentHp = Math.max(0, this.enemy.currentHp - damage);
+        this.enemyShake = 12;
+
+        if (this.enemy.currentHp <= 0) {
+            this.state = 'victory';
+            this.addLog(`${this.enemy.name} defeated!`);
+            return { type: 'victory', damage, isWeak };
+        }
+
+        this.startEnemyTurn();
+        return { type: 'scrollHit', damage, isWeak, element: effect.element };
+    }
+
     playerDefend() {
         if (this.state !== 'playerTurn' || this.animating) return;
 

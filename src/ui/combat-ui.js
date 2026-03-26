@@ -240,6 +240,31 @@ class CombatUI {
                 if (canUse && inp.clickedIn(abx, aby, 120, 28)) { ab.action(); }
             });
 
+            // Scrolls (elemental attacks)
+            const scrolls = game.inventory.getItemsByCategory('scroll');
+            if (scrolls.length > 0) {
+                scrolls.slice(0, 2).forEach((scroll, i) => {
+                    const sx = 570 + i * 130;
+                    const sy = 650;
+                    const sHover = inp.isOver(sx, sy, 120, 22);
+                    r.button(sx, sy, 120, 22, `${scroll.icon} ${scroll.name.split(' ')[0]} (${scroll.quantity})`, sHover, false, '#2a2a5a');
+                    if (inp.clickedIn(sx, sy, 120, 22)) {
+                        const result = combat.playerUseScroll(scroll);
+                        if (result) {
+                            game.inventory.removeItem(scroll.id, 1);
+                            const elemColors = { fire: '#ff4400', ice: '#44aaff', dark: '#aa44ff' };
+                            game.particles.damage(ex, ey + 30, result.damage, result.isWeak);
+                            if (result.isWeak) {
+                                game.notify('💥 Super Effective!', '#ffd700');
+                                r.flash(elemColors[result.element] || '#fff', 200);
+                            }
+                            game.audio.crit();
+                            if (result.type === 'victory') game.audio.victory();
+                        }
+                    }
+                });
+            }
+
             // Potions
             const potions = game.inventory.getItemsByCategory('potion');
             if (potions.length > 0) {
