@@ -227,6 +227,13 @@ class ExploreUI {
                     } else if (autoResult.type === 'event') {
                         ExploreUI._autoExplore = false; // Stop auto on events
                         ExploreUI.handleEvent(game, autoResult.event);
+                    } else if (autoResult.type === 'nothing') {
+                        // Auto-advance floor after some searches
+                        ExploreUI._autoSearchCount = (ExploreUI._autoSearchCount || 0) + 1;
+                        if (ExploreUI._autoSearchCount >= 3 && exploration.currentFloor < area.floors) {
+                            exploration.advanceFloor();
+                            ExploreUI._autoSearchCount = 0;
+                        }
                     }
                 }
             }

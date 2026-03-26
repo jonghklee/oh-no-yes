@@ -313,6 +313,7 @@ class ShopSystem {
 
     newDay() {
         this.dailySales = 0;
+        this._goalClaimed = false;
         this.dailyEarnings = 0;
         this.customers = [];
         this.activeNegotiation = null;

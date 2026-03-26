@@ -118,7 +118,17 @@ class ShopUI {
         r.text(`Daily Goal: ${shop.dailyEarnings}/${dailyGoal}g`, 1050, 58, goalPct >= 1 ? '#44ff44' : '#888', 9, 'right');
         r.progressBar(1060, 60, 120, 6, goalPct, 1, goalPct >= 1 ? '#44ff44' : '#ffd700', '#222');
         if (goalPct >= 1 && !shop._goalClaimed) {
-            r.text('🎁 Claim!', 1130, 68, '#ffd700', 8, 'center');
+            const claimHover = inp.isOver(1100, 66, 80, 14);
+            r.roundRect(1100, 66, 80, 14, 3, claimHover ? '#5a4020' : '#3a2a10', '#ffd700');
+            r.text('🎁 Claim!', 1140, 68, '#ffd700', 8, 'center');
+            if (inp.clickedIn(1100, 66, 80, 14)) {
+                shop._goalClaimed = true;
+                const bonus = Math.round(dailyGoal * 0.2);
+                game.addGold(bonus);
+                game.notify(`📊 Daily goal achieved! +${bonus}g bonus!`, '#44ff44', 3000);
+                game.audio.coin();
+                game.particles.goldGain(1140, 70, bonus);
+            }
         }
 
         if (shop.customers.length === 0 && !shop.activeNegotiation) {
