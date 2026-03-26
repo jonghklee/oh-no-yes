@@ -323,7 +323,13 @@ class ShopUI {
         // === BOTTOM LEFT: Daily Summary ===
         r.panel(10, 610, 380, 140, '📊 Today\'s Summary');
         r.text(`Sales: ${shop.dailySales}`, 25, 645, '#fff', 12);
+        // Earnings with yesterday comparison
         r.text(`Earnings: ${shop.dailyEarnings}g`, 25, 665, '#ffd700', 12);
+        const yesterday = game.statsTracker.dailyIncome.length > 1 ? game.statsTracker.dailyIncome[game.statsTracker.dailyIncome.length - 1] : 0;
+        if (yesterday > 0 && shop.dailyEarnings > 0) {
+            const vsYesterday = Math.round((shop.dailyEarnings / yesterday - 1) * 100);
+            r.text(vsYesterday >= 0 ? `▲${vsYesterday}%` : `▼${Math.abs(vsYesterday)}%`, 200, 667, vsYesterday >= 0 ? '#44ff44' : '#ff4444', 9);
+        }
         r.text(`Total Sales: ${shop.totalSales}`, 25, 685, '#aaa', 11);
         r.text(`Total Earnings: ${Utils.formatGold(shop.totalEarnings)}g`, 25, 705, '#aaa', 11);
         r.text(`Tax Rate: ${Math.round(game.economy.getEffectiveTaxRate(bonuses) * 100)}%`, 25, 725, '#ff8888', 11);
