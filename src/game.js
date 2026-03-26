@@ -927,6 +927,12 @@ class Game {
         this.audio.init();
         this.audio.startMusic('shop');
 
+        // Auto-stock some starting items to shop display for immediate action
+        this.shop.addToDisplay('wood', 3, this.inventory);
+        this.shop.addToDisplay('stone', 2, this.inventory);
+        this.shop.addToDisplay('herb', 3, this.inventory);
+        this.shop.addToDisplay('leather', 2, this.inventory);
+
         // Apply prestige bonuses with special unlocks
         if (this.prestigeLevel > 0) {
             const p = this.prestigeLevel;
@@ -953,9 +959,11 @@ class Game {
             // Welcome dialog for new players
             setTimeout(() => {
                 this.showDialog(
-                    'Welcome to Oh No Yes! You\'ve inherited a small shop in a magical world. ' +
-                    'Buy materials, craft items, and sell to customers to build your merchant empire! ' +
-                    'Start by stocking items in your Shop Display.', null);
+                    'Welcome to Oh No Yes! 🏪\n\n' +
+                    'Your shop is already stocked with items to sell!\n' +
+                    'Wait for customers, then Accept their offers.\n\n' +
+                    '📋 Tips: Explore (tab 3) for materials, Craft (tab 2) for goods,\n' +
+                    'sell everything for profit. Press 1-7 to switch tabs!', null);
             }, 500);
             this.notify('Welcome to Oh No Yes! Build your merchant empire!', '#ffd700', 5000);
         }

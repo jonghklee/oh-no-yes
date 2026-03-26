@@ -156,6 +156,12 @@ class CraftingUI {
         // === RIGHT: Selected Recipe Detail ===
         r.panel(710, 55, 480, 400, '📖 Recipe Details');
 
+        // Hint for new players
+        if (crafting.totalCrafts === 0) {
+            r.text('💡 Click a recipe on the left, then click Craft!', 720, 440, '#ffd700', 10);
+            r.text('Green numbers = you have enough materials', 720, 456, '#88ff88', 9);
+        }
+
         if (CraftingUI.selectedRecipe) {
             const recipe = RecipeDB[CraftingUI.selectedRecipe];
             const result = ItemDB[recipe.result];
