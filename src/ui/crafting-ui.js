@@ -58,6 +58,21 @@ class CraftingUI {
         r.progressBar(20, 330, 160, 12, crafting.xp, xpNeeded, '#4488ff', '#222');
         r.text(`${crafting.xp}/${xpNeeded} XP`, 25, 330, '#fff', 8);
         r.text(`Total Crafts: ${crafting.totalCrafts}`, 20, 350, '#888', 10);
+        r.text(`Chain: x${crafting._craftChain || 0}`, 120, 350, crafting._craftChain > 0 ? '#ff8844' : '#555', 10);
+
+        // Best profit recommendation
+        const allRecipes = crafting.getAvailableRecipes();
+        let bestProfit = 0, bestRecipeName = '';
+        for (const rec of allRecipes) {
+            if (!crafting.canCraft(rec.id, game.inventory).can) continue;
+            const sell = game.economy.getSellPrice(rec.result, 1.0, bonuses) * rec.resultQty;
+            const cost = rec.ingredients.reduce((s, i) => s + game.economy.getPrice(i.item) * i.qty, 0);
+            if (sell - cost > bestProfit) { bestProfit = sell - cost; bestRecipeName = ItemDB[rec.result]?.name || ''; }
+        }
+        if (bestRecipeName) {
+            r.text(`💡 Best: ${bestRecipeName}`, 20, 368, '#44ff44', 9);
+            r.text(`+${bestProfit}g profit`, 20, 380, '#ffd700', 8);
+        }
 
         // === CENTER: Recipe List ===
         r.panel(200, 55, 500, 700, '📜 Recipes');
