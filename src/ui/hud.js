@@ -47,6 +47,22 @@ class HUD {
         }
         r.text(`${game.xp}/${xpNeeded}`, 190, 16, '#ddd', 9);
 
+        // Mini income sparkline (last 7 days)
+        const incomeData = game.statsTracker.dailyIncome.slice(-7);
+        if (incomeData.length > 1) {
+            const sparkX = 270, sparkW = 15, sparkH = 10;
+            const max = Math.max(1, ...incomeData);
+            r.setAlpha(0.5);
+            for (let si = 1; si < incomeData.length; si++) {
+                const x1 = sparkX + ((si-1)/(incomeData.length-1))*sparkW;
+                const y1 = 32 - (incomeData[si-1]/max)*sparkH;
+                const x2 = sparkX + (si/(incomeData.length-1))*sparkW;
+                const y2 = 32 - (incomeData[si]/max)*sparkH;
+                r.line(x1, y1, x2, y2, '#ffd700', 1);
+            }
+            r.resetAlpha();
+        }
+
         // Day & Season
         const season = getSeason(game.day);
         const dayInSeason = getDayInSeason(game.day);
