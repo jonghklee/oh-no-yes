@@ -34,7 +34,9 @@ class AudioSystem {
     }
 
     // Sound effects
+    hover() { this.play('sine', 1200, 0.02, 0.05); }
     click() { this.play('sine', 800, 0.05, 0.2); }
+    tabSwitch() { this.play('sine', 600, 0.05, 0.15); this.play('sine', 900, 0.05, 0.1); }
     buy() { this.play('sine', 523, 0.1, 0.3); this.play('sine', 659, 0.1, 0.3); }
     sell() { this.play('sine', 660, 0.08, 0.3); this.play('triangle', 880, 0.12, 0.2); }
     craft() { this.play('square', 200, 0.15, 0.2); this.play('square', 300, 0.1, 0.2); }

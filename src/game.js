@@ -564,9 +564,12 @@ class Game {
     }
 
     switchScreen(screen) {
-        if (this.combat.active && screen !== 'combat') return; // can't leave combat
+        if (this.combat.active && screen !== 'combat') return;
+        if (this.screen === screen) return; // Already on this screen
         this.previousScreen = this.screen;
         this.screen = screen;
+        this._screenTransition = 8; // Fade frames
+        this.audio.tabSwitch();
         this.scrollOffset = 0;
         this.selectedItem = null;
         this.audio.click();

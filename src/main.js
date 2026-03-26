@@ -37,6 +37,14 @@
                 case 'map': MapUI.render(game); break;
             }
 
+            // Screen transition fade
+            if (game._screenTransition > 0) {
+                game.renderer.setAlpha(game._screenTransition * 0.06);
+                game.renderer.fillRect(0, 44, 1200, 712, '#0a0520');
+                game.renderer.resetAlpha();
+                game._screenTransition--;
+            }
+
             // HUD always on top
             HUD.render(game);
 

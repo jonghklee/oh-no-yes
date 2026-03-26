@@ -185,10 +185,20 @@ class ExploreUI {
                     game.combat.startBattle(game.getPlayerStats(), result.enemy);
                     game.switchScreen('combat');
                 } else if (result.type === 'gather') {
-                    for (const g of result.items) {
+                    for (let gi = 0; gi < result.items.length; gi++) {
+                        const g = result.items[gi];
                         game.inventory.addItem(g.item, g.qty);
                         game.codex.discoverItem(g.item);
                         game.trackDaily('gather', g.qty);
+                        // Floating item pickup animation
+                        const item = ItemDB[g.item];
+                        if (item) {
+                            game.particles.floatingText(
+                                300 + gi * 80, 450,
+                                `${item.icon} +${g.qty}`,
+                                RarityColors[item.rarity] || '#fff', 14, 50
+                            );
+                        }
                     }
                     // Synergy
                     game._dailyActivities = game._dailyActivities || new Set();
