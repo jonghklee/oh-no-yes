@@ -48,7 +48,12 @@ class InventoryUI {
                     game.audio.click();
                 }
             } else {
-                r.text(`Empty ${slot}`, 65, sy + 15, '#555', 12);
+                // Pulsing empty slot indicator
+                const emptyPulse = Math.sin(Date.now() / 800 + i) * 0.15 + 0.85;
+                r.setAlpha(emptyPulse);
+                r.text(`Empty ${slot}`, 65, sy + 12, '#666', 11);
+                r.text('Click Items tab to equip', 65, sy + 28, '#444', 8);
+                r.resetAlpha();
             }
         });
 
@@ -91,6 +96,7 @@ class InventoryUI {
             inventoryValue += (item.basePrice || 0) * (item.quantity || 1);
         }
         r.text(`💎 Net Worth: ${Utils.formatGold(game.gold + inventoryValue + game.bank.deposits)}g`, 25, 625, '#ffd700', 9);
+        r.text(`📦 Inv: ${Utils.formatGold(inventoryValue)}g | 🏦 Bank: ${Utils.formatGold(game.bank.deposits)}g`, 25, 638, '#888', 8);
 
         // === Main Inventory ===
         r.panel(270, 55, 550, 700, `🎒 Inventory (${inv.getUsedSlots()}/${inv.maxSlots})`);
