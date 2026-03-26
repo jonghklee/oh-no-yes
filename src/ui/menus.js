@@ -190,6 +190,10 @@ class ExploreUI {
                         game.codex.discoverItem(g.item);
                         game.trackDaily('gather', g.qty);
                     }
+                    // Synergy
+                    game._dailyActivities = game._dailyActivities || new Set();
+                    game._dailyActivities.add('gather');
+                    game.checkSynergyBonus();
                     // Auto-discover recipes from gathered materials
                     const newRecipes = game.crafting.discoverByMaterials(game.inventory);
                     if (newRecipes.length > 0) {

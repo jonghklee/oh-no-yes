@@ -165,6 +165,11 @@ class Game {
         this.shop.newDay();
         this.exploration.newDay();
 
+        // Reset daily synergy
+        this._dailyActivities = new Set();
+        this._synergy3Claimed = false;
+        this._synergy4Claimed = false;
+
         // Market order processing
         const orderResults = this.marketOrders.processOrders(this.economy, this.inventory, this.getSkillBonuses());
         for (const or of orderResults) {
@@ -354,13 +359,14 @@ class Game {
             }
         }
 
-        if (this.screen === 'craft') {
+        // Crafting runs on all screens (not just craft tab)
+        {
             const result = this.crafting.update(dt, this.inventory, this.getSkillBonuses());
             if (result) {
                 this.inventory.addItem(result.itemId, result.qty);
                 this.notify(`Crafted ${ItemDB[result.itemId]?.name || result.itemId} x${result.qty}!`, '#44aaff');
                 this.audio.craft();
-                this.particles.craftEffect(900, 400);
+                if (this.screen === 'craft') this.particles.craftEffect(900, 400);
                 this.quests.updateProgress('craft', { count: 1 });
                 this.quests.updateProgress('totalCrafts', { count: this.crafting.totalCrafts });
                 this.trackDaily('craft', 1);
@@ -372,6 +378,22 @@ class Game {
                     this.notify(`Crafting level up! Level ${result.newLevel}`, '#ffd700');
                     this.particles.levelUpEffect(600, 400);
                 }
+
+                // Auto-stock crafted items to shop if enabled and item is sellable
+                if (this.shop.autoRestock) {
+                    const item = ItemDB[result.itemId];
+                    if (item && item.basePrice > 0 && !item.quest && item.crafted) {
+                        if (this.shop.displayItems.length < this.shop.maxDisplay) {
+                            this.shop.addToDisplay(result.itemId, result.qty, this.inventory);
+                            this.notify(`Auto-stocked ${item.name} to shop!`, '#44aaff');
+                        }
+                    }
+                }
+
+                // Synergy tracking
+                this._dailyActivities = this._dailyActivities || new Set();
+                this._dailyActivities.add('craft');
+                this.checkSynergyBonus();
             }
         }
 
@@ -510,6 +532,9 @@ class Game {
         }
         this.trackDaily('defeat', 1);
         if (this.combat.enemy) this.codex.discoverEnemy(this.combat.enemy.id);
+        this._dailyActivities = this._dailyActivities || new Set();
+        this._dailyActivities.add('combat');
+        this.checkSynergyBonus();
         for (const drop of rewards.drops) {
             this.codex.discoverItem(drop.item);
         }
@@ -545,6 +570,30 @@ class Game {
         this.scrollOffset = 0;
         this.selectedItem = null;
         this.audio.click();
+    }
+
+    checkSynergyBonus() {
+        if (!this._dailyActivities) return;
+        const acts = this._dailyActivities;
+        const count = acts.size;
+
+        // Synergy bonuses at 3+ different activities
+        if (count === 3 && !this._synergy3Claimed) {
+            this._synergy3Claimed = true;
+            const bonus = Math.round(50 * this.level);
+            this.addGold(bonus);
+            this.notify(`🔗 Synergy x3! Sell+Craft+Gather! +${bonus}g`, '#ff88ff');
+            this.particles.burst(600, 400, 10, '#ff88ff', 3);
+        }
+        if (count === 4 && !this._synergy4Claimed) {
+            this._synergy4Claimed = true;
+            const bonus = Math.round(150 * this.level);
+            this.addGold(bonus);
+            this.addXp(50 * this.level);
+            this.notify(`🔗 Synergy x4! All activities! +${bonus}g +XP!`, '#ff44ff');
+            this.particles.burst(600, 400, 15, '#ff44ff', 4);
+            this.audio.victory();
+        }
     }
 
     trackDaily(type, amount = 1) {
@@ -596,6 +645,11 @@ class Game {
         this.particles.goldGain(600, 400, price);
         this.trackDaily('sell', 1);
         this.trackDaily('earnGold', price);
+
+        // Synergy tracking
+        this._dailyActivities = this._dailyActivities || new Set();
+        this._dailyActivities.add('sell');
+        this.checkSynergyBonus();
         return true;
     }
 
