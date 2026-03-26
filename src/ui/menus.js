@@ -174,6 +174,46 @@ class ExploreUI {
         // Action buttons
         r.panel(10, 525, 600, 230, '⚡ Actions');
 
+        // Auto-explore toggle
+        if (!ExploreUI._autoExplore) ExploreUI._autoExplore = false;
+        const autoExpHover = inp.isOver(480, 530, 110, 22);
+        r.roundRect(480, 530, 110, 22, 3,
+            ExploreUI._autoExplore ? '#2a5a2a' : (autoExpHover ? 'rgba(40,60,40,0.5)' : 'rgba(20,30,20,0.3)'),
+            ExploreUI._autoExplore ? '#44aa44' : '#444');
+        r.text(`🔄 Auto: ${ExploreUI._autoExplore ? 'ON' : 'OFF'}`, 488, 534, ExploreUI._autoExplore ? '#88ff88' : '#888', 10);
+        if (inp.clickedIn(480, 530, 110, 22)) {
+            ExploreUI._autoExplore = !ExploreUI._autoExplore;
+            game.audio.click();
+        }
+
+        // Auto-explore timer
+        if (ExploreUI._autoExplore) {
+            ExploreUI._autoTimer = (ExploreUI._autoTimer || 0) + 16; // ~60fps
+            if (ExploreUI._autoTimer > 1500) { // Every 1.5 seconds
+                ExploreUI._autoTimer = 0;
+                const autoResult = exploration.exploreStep(game.getSkillBonuses());
+                if (autoResult) {
+                    game.audio.discover();
+                    if (autoResult.type === 'combat') {
+                        ExploreUI._autoExplore = false; // Stop auto on combat
+                        game.combat.startBattle(game.getPlayerStats(), autoResult.enemy);
+                        game.switchScreen('combat');
+                    } else if (autoResult.type === 'gather') {
+                        for (const g of autoResult.items) {
+                            game.inventory.addItem(g.item, g.qty);
+                            game.codex.discoverItem(g.item);
+                            game.trackDaily('gather', g.qty);
+                        }
+                        game._dailyActivities = game._dailyActivities || new Set();
+                        game._dailyActivities.add('gather');
+                    } else if (autoResult.type === 'event') {
+                        ExploreUI._autoExplore = false; // Stop auto on events
+                        ExploreUI.handleEvent(game, autoResult.event);
+                    }
+                }
+            }
+        }
+
         // Explore step
         const stepHover = inp.isOver(30, 558, 200, 45);
         r.button(30, 558, 200, 45, '🔍 Search Area', stepHover);

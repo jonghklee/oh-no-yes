@@ -10,14 +10,26 @@ class CombatUI {
         // Background
         r.gradientRect(0, 50, 1200, 700, '#0a0520', '#1a0a2e');
 
-        // Arena effect
+        // Arena effect - more dramatic for bosses
         const time = Date.now() / 1000;
-        r.setAlpha(0.1);
-        for (let i = 0; i < 5; i++) {
-            r.circle(600 + Math.sin(time + i) * 200, 350 + Math.cos(time + i) * 100,
-                50 + Math.sin(time * 2 + i) * 20, '#4a2080');
+        const isBoss = combat.enemy.boss;
+        const arenaColor = isBoss ? '#802020' : '#4a2080';
+        const arenaCount = isBoss ? 8 : 5;
+        r.setAlpha(isBoss ? 0.15 : 0.1);
+        for (let i = 0; i < arenaCount; i++) {
+            const spd = isBoss ? 1.5 : 1;
+            r.circle(600 + Math.sin(time * spd + i) * 250, 350 + Math.cos(time * spd + i) * 120,
+                50 + Math.sin(time * 2 + i) * 25, arenaColor);
         }
         r.resetAlpha();
+
+        // Boss intro warning text (first 3 seconds of battle)
+        if (isBoss && combat.log.length <= 2) {
+            const introAlpha = Math.sin(time * 4) * 0.3 + 0.7;
+            r.setAlpha(introAlpha);
+            r.textBold('⚠ BOSS BATTLE ⚠', 600, 60, '#ff4444', 20, 'center');
+            r.resetAlpha();
+        }
 
         // === ENEMY ===
         const ex = 750 + (combat.enemyShake > 0 ? Utils.random(-3, 3) : 0);

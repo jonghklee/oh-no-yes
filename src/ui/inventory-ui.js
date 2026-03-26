@@ -3,6 +3,7 @@ class InventoryUI {
     static selectedItem = null;
     static scrollY = 0;
     static filterCategory = 'all';
+    static sortMode = 'default'; // default, price, rarity, name
 
     static render(game) {
         const r = game.renderer;
@@ -104,10 +105,40 @@ class InventoryUI {
             fx += w + 4;
         });
 
-        const items = inv.getItemList().filter(item => {
+        // Sort buttons
+        const sortModes = [
+            { id: 'default', label: 'Default' },
+            { id: 'price', label: 'Price ↓' },
+            { id: 'rarity', label: 'Rarity ↓' },
+            { id: 'name', label: 'A-Z' }
+        ];
+        let sx = 285;
+        r.text('Sort:', sx, 108, '#666', 9);
+        sx += 30;
+        sortModes.forEach(sm => {
+            const isActive = InventoryUI.sortMode === sm.id;
+            const w = r.measureText(sm.label, 9) + 10;
+            const hov = inp.isOver(sx, 106, w, 16);
+            r.roundRect(sx, 106, w, 16, 2, isActive ? '#3d1e6d' : (hov ? 'rgba(61,30,109,0.3)' : 'transparent'));
+            r.text(sm.label, sx + 5, 108, isActive ? '#fff' : '#666', 9);
+            if (inp.clickedIn(sx, 106, w, 16)) { InventoryUI.sortMode = sm.id; game.audio.click(); }
+            sx += w + 3;
+        });
+
+        let items = inv.getItemList().filter(item => {
             if (InventoryUI.filterCategory === 'all') return true;
             return item.category === InventoryUI.filterCategory;
         });
+
+        // Apply sort
+        const rarityOrder = ['legendary', 'epic', 'rare', 'uncommon', 'common'];
+        if (InventoryUI.sortMode === 'price') {
+            items = items.sort((a, b) => (b.basePrice || 0) - (a.basePrice || 0));
+        } else if (InventoryUI.sortMode === 'rarity') {
+            items = items.sort((a, b) => rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity));
+        } else if (InventoryUI.sortMode === 'name') {
+            items = items.sort((a, b) => a.name.localeCompare(b.name));
+        }
 
         if (inp.isOver(270, 110, 550, 640)) {
             InventoryUI.scrollY = Utils.clamp(InventoryUI.scrollY - inp.scrollDelta * 30, -(items.length * 40 - 580), 0);
