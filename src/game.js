@@ -27,6 +27,7 @@ class Game {
         this.milestones = new MilestoneSystem();
         this.luckySpin = new LuckySpinSystem();
         this.fusion = new FusionSystem();
+        this.marketOrders = new MarketOrderSystem();
         this.enchantment = new EnchantmentSystem();
         this.prestige = new PrestigeSystem();
         this.pets = new PetSystem();
@@ -163,6 +164,17 @@ class Game {
         this.economy.updatePrices(this.day);
         this.shop.newDay();
         this.exploration.newDay();
+
+        // Market order processing
+        const orderResults = this.marketOrders.processOrders(this.economy, this.inventory, this.getSkillBonuses());
+        for (const or of orderResults) {
+            if (or.type === 'sold') {
+                this.addGold(or.gold);
+                this.notify(`📊 Auto-sold ${or.qty}x ${ItemDB[or.item]?.name || or.item} for ${or.gold}g`, '#44ddff');
+            } else if (or.type === 'alert') {
+                this.notify(`📊 Price Alert: ${ItemDB[or.item]?.name} is now ${or.price}g (${or.direction})!`, '#ffaa44');
+            }
+        }
 
         // Bank interest processing
         this.bank.updateMaxDeposit(this.reputation.reputation);
@@ -475,6 +487,19 @@ class Game {
             this.inventory.addItem(drop.item, qty);
         }
 
+        // Equipment drop chance
+        const area = this.exploration.currentArea;
+        const difficulty = area ? area.difficulty : (this.combat.enemy?.boss ? 8 : 3);
+        if (LootGenerator.shouldDrop(difficulty)) {
+            const enemyLevel = Math.max(1, Math.round(difficulty * 3));
+            const itemId = LootGenerator.generate(enemyLevel, area?.id);
+            this.inventory.addItem(itemId, 1);
+            const item = ItemDB[itemId];
+            this.notify(`⚔ Equipment drop: ${item.icon} ${item.name}!`, RarityColors[item.rarity], 4000);
+            this.particles.burst(600, 400, 10, RarityColors[item.rarity], 3);
+            this.audio.discover();
+        }
+
         // Quest progress
         this.quests.updateProgress('defeatBoss', { boss: this.combat.enemy?.id });
 
@@ -606,7 +631,8 @@ class Game {
             bank: this.bank.serialize(),
             milestones: this.milestones.serialize(),
             luckySpin: this.luckySpin.serialize(),
-            fusion: this.fusion.serialize()
+            fusion: this.fusion.serialize(),
+            marketOrders: this.marketOrders.serialize()
         };
         this.saveSystem.save(state);
     }
@@ -648,6 +674,7 @@ class Game {
         if (data.milestones) this.milestones.deserialize(data.milestones);
         if (data.luckySpin) this.luckySpin.deserialize(data.luckySpin);
         if (data.fusion) this.fusion.deserialize(data.fusion);
+        if (data.marketOrders) this.marketOrders.deserialize(data.marketOrders);
 
         this.economy.updatePrices(this.day);
         this.screen = 'shop';
