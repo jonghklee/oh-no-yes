@@ -115,7 +115,19 @@ class ExploreUI {
 
         // Stamina info
         r.text(`⚡ Stamina: ${exploration.stamina}/${exploration.maxStamina}`, 20, 730, '#44ddff', 13);
-        r.text('Stamina recovers each day', 200, 732, '#666', 10);
+
+        // Quick re-enter last area
+        if (exploration._lastAreaId) {
+            const lastArea = AreaDB[exploration._lastAreaId];
+            if (lastArea && exploration.canExplore(exploration._lastAreaId, game.level).can) {
+                const reHover = inp.isOver(200, 725, 200, 22);
+                r.button(200, 725, 200, 22, `🔄 ${lastArea.icon} ${lastArea.name}`, reHover, false, '#2a3a5a');
+                if (inp.clickedIn(200, 725, 200, 22)) {
+                    exploration.startExploration(exploration._lastAreaId, game.level, game.getSkillBonuses());
+                    game.audio.discover();
+                }
+            }
+        }
 
         // Rest button
         if (exploration.stamina < exploration.maxStamina) {

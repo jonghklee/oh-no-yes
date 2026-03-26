@@ -36,6 +36,7 @@ class ExplorationSystem {
         this.stamina -= cost;
         this.active = true;
         this.currentArea = area;
+        this._lastAreaId = areaId;
         this.currentFloor = (this.maxFloorReached[areaId] || 0) + 1;
         this.currentFloor = Math.min(this.currentFloor, area.floors);
         this.gatheredItems = [];

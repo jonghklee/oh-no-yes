@@ -36,9 +36,9 @@ const CustomerDB = {
         dialogue: {
             enter: ["Let's see your wares.", "I'm looking for bulk deals.", "What's your best price?"],
             haggle: ["I know the real price.", "I can get this cheaper elsewhere.", "Come on, merchant to merchant."],
-            buy: ["Fair deal.", "Pleasure doing business.", "I'll be back for more."],
-            leave: ["Your prices are too high.", "I'll find a better deal.", "Not today."],
-            happy: ["Excellent stock!", "You've got a good eye for goods!", "Worth every coin!"]
+            buy: ["Fair deal.", "Pleasure doing business.", "I'll be back for more.", "Good quality for the price.", "My clients will love these."],
+            leave: ["Your prices are too high.", "I'll find a better deal.", "Not today.", "I know a cheaper source.", "Maybe when prices drop."],
+            happy: ["Excellent stock!", "You've got a good eye for goods!", "Worth every coin!", "Top-tier merchandise!", "I'll recommend your shop!"]
         }
     },
     adventurer: {
@@ -50,7 +50,7 @@ const CustomerDB = {
         dialogue: {
             enter: ["Got any good weapons?", "I need supplies for the road.", "Anything that'll keep me alive?"],
             haggle: ["Come on, I risk my life out there!", "A little discount for a hero?", "I've saved this town before!"],
-            buy: ["This'll serve me well!", "Perfect for my next quest!", "Sharp and sturdy!"],
+            buy: ["This'll serve me well!", "Perfect for my next quest!", "Sharp and sturdy!", "Just what I needed!", "My party will be pleased!"],
             leave: ["I'll manage without it.", "Too expensive for dungeon gear.", "I'll find a chest."],
             happy: ["Best gear in town!", "You're my favorite merchant!", "This is legendary quality!"]
         }
