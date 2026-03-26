@@ -138,7 +138,15 @@ class CombatUI {
         combat.log.forEach((msg, i) => {
             const alpha = (i + 1) / combat.log.length;
             r.setAlpha(alpha);
-            r.text(msg, 45, 550 + i * 20, '#ddd', 11);
+            // Color-code log messages
+            let logColor = '#ddd';
+            if (msg.includes('damage') || msg.includes('Defeated')) logColor = '#ff8888';
+            if (msg.includes('Heal') || msg.includes('Restored')) logColor = '#88ff88';
+            if (msg.includes('CRITICAL') || msg.includes('Super')) logColor = '#ffd700';
+            if (msg.includes('Defend') || msg.includes('Shield')) logColor = '#4488ff';
+            if (msg.includes('War Cry') || msg.includes('ATK')) logColor = '#ff8844';
+            if (msg.includes('escaped') || msg.includes('Dodge')) logColor = '#44ffff';
+            r.text(msg, 45, 550 + i * 20, logColor, 11);
             r.resetAlpha();
         });
 

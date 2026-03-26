@@ -8,9 +8,25 @@ class HUD {
         r.gradientRect(0, 0, 1200, 44, 'rgba(20,10,40,0.95)', 'rgba(20,10,40,0.7)');
         r.line(0, 44, 1200, 44, '#3d1e6d', 2);
 
-        // Gold
+        // Gold with change flash
         r.text('💰', 10, 12, '#ffd700', 18);
         r.textBold(Utils.formatGold(game.gold) + 'g', 34, 14, '#ffd700', 15);
+
+        // Gold change indicator
+        if (!HUD._lastGold) HUD._lastGold = game.gold;
+        if (game.gold !== HUD._lastGold) {
+            const diff = game.gold - HUD._lastGold;
+            HUD._goldChangeText = diff > 0 ? `+${Utils.formatGold(diff)}` : `${Utils.formatGold(diff)}`;
+            HUD._goldChangeColor = diff > 0 ? '#44ff44' : '#ff4444';
+            HUD._goldChangeTimer = 60;
+            HUD._lastGold = game.gold;
+        }
+        if (HUD._goldChangeTimer > 0) {
+            r.setAlpha(HUD._goldChangeTimer / 60);
+            r.text(HUD._goldChangeText, 34, 30, HUD._goldChangeColor, 9);
+            r.resetAlpha();
+            HUD._goldChangeTimer--;
+        }
 
         // Level
         r.text(`Lv.${game.level}`, 140, 14, '#fff', 13);
