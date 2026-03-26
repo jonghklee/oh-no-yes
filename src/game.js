@@ -552,7 +552,13 @@ class Game {
             const result = this.crafting.update(dt, this.inventory, this.getSkillBonuses());
             if (result) {
                 this.inventory.addItem(result.itemId, result.qty);
-                this.notify(`Crafted ${ItemDB[result.itemId]?.name || result.itemId} x${result.qty}!`, '#44aaff');
+                // Show craft notification with sell value
+                const craftedItem = ItemDB[result.itemId];
+                const craftSellValue = craftedItem ? this.economy.getSellPrice(result.itemId, 1.0, this.getSkillBonuses()) * result.qty : 0;
+                const craftMsg = craftSellValue > 0
+                    ? `Crafted ${craftedItem?.name || result.itemId} x${result.qty} (worth ${craftSellValue}g)`
+                    : `Crafted ${craftedItem?.name || result.itemId} x${result.qty}!`;
+                this.notify(craftMsg, '#44aaff');
                 this.audio.craft();
                 if (this.screen === 'craft') this.particles.craftEffect(900, 400);
                 this.quests.updateProgress('craft', { count: 1 });
