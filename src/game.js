@@ -180,11 +180,12 @@ class Game {
         this.dayPhase = 'morning';
         this.dayTimer = 0;
 
-        // Show brief summary notification
+        // Show brief summary notification with rating
         if (daySummary.sales > 0 || daySummary.earnings > 0) {
-            let summary = `Day ${this.day - 1} recap: ${daySummary.sales} sales, ${daySummary.earnings}g earned`;
-            if (daySummary.dailyDone) summary += ' ✅ Daily done!';
-            this.notify(summary, '#aaaaff', 4000);
+            const rating = daySummary.sales >= 5 ? '⭐⭐⭐' : daySummary.sales >= 3 ? '⭐⭐' : daySummary.sales >= 1 ? '⭐' : '';
+            let summary = `Day ${this.day - 1} ${rating}: ${daySummary.sales} sales, ${daySummary.earnings}g`;
+            if (daySummary.dailyDone) summary += ' ✅';
+            this.notify(summary, '#aaaaff', 3000);
         }
 
         // Update systems
@@ -882,6 +883,17 @@ class Game {
         this.reputation.addReputation(1);
         this.particles.goldGain(600, 400, price);
         this.trackDaily('sell', 1);
+
+        // Sale count celebrations
+        const totalSales = this.shop.totalSales + 1;
+        const saleMilestones = { 10: 100, 25: 250, 50: 500, 100: 1000, 250: 2500, 500: 5000, 1000: 10000 };
+        if (saleMilestones[totalSales]) {
+            const bonus = saleMilestones[totalSales];
+            this.addGold(bonus);
+            this.notify(`🎊 ${totalSales} sales! Milestone bonus: +${bonus}g!`, '#ffd700', 4000);
+            this.audio.questComplete();
+            this.particles.burst(600, 400, 15, '#ffd700', 4);
+        }
         this.trackDaily('earnGold', price);
         this.challengeMode.addScore('sales', 1);
         this.challengeMode.addScore('gold', price);
