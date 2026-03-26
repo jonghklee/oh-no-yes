@@ -82,16 +82,17 @@ class HUD {
             }
         }
 
-        // Speed control
-        const speedColors = { 1: '#aaa', 2: '#88ff88', 3: '#ffaa44' };
-        const speedBtn = r.button(1050, 8, 30, 28, `${game.gameSpeed}x`, inp.isOver(1050, 8, 30, 28));
+        // Speed control with color
+        const speedColor = game.gameSpeed === 1 ? '#3d1e6d' : game.gameSpeed === 2 ? '#2a5a2a' : '#5a4a20';
+        const speedBtn = r.button(1050, 8, 30, 28, `${game.gameSpeed}x`, inp.isOver(1050, 8, 30, 28), false, speedColor);
         if (inp.clickedIn(1050, 8, 30, 28)) {
             game.gameSpeed = game.gameSpeed >= 3 ? 1 : game.gameSpeed + 1;
             game.audio.click();
         }
 
-        // Pause
-        const pauseBtn = r.button(1090, 8, 30, 28, game.paused ? '▶' : '⏸', inp.isOver(1090, 8, 30, 28));
+        // Pause with visual state
+        const pauseColor = game.paused ? '#5a2020' : '#3d1e6d';
+        const pauseBtn = r.button(1090, 8, 30, 28, game.paused ? '▶' : '⏸', inp.isOver(1090, 8, 30, 28), false, pauseColor);
         if (inp.clickedIn(1090, 8, 30, 28)) {
             game.paused = !game.paused;
             game.audio.click();

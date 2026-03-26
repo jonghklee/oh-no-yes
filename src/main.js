@@ -62,6 +62,18 @@
                 game.renderer.vignette(0.25);
             }
 
+            // Pause overlay
+            if (game.paused) {
+                game.renderer.setAlpha(0.3);
+                game.renderer.fillRect(0, 44, 1200, 712, '#000');
+                game.renderer.resetAlpha();
+                const pausePulse = Math.sin(Date.now() / 500) * 0.2 + 0.8;
+                game.renderer.setAlpha(pausePulse);
+                game.renderer.textBold('⏸ PAUSED', 600, 380, '#fff', 32, 'center');
+                game.renderer.text('Press Space to resume', 600, 420, '#aaa', 14, 'center');
+                game.renderer.resetAlpha();
+            }
+
             // Tooltip
             if (game.tooltipItem) {
                 game.renderer.tooltip(game.input.mouseX + 15, game.input.mouseY + 15, game.tooltipItem);
