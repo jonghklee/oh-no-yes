@@ -601,6 +601,7 @@ class Game {
 
     saveGame() {
         const state = {
+            lastSaveTime: Date.now(),
             gold: this.gold,
             level: this.level,
             xp: this.xp,
@@ -680,7 +681,48 @@ class Game {
         this.screen = 'shop';
         this.audio.init();
         this.audio.startMusic('shop');
+
+        // Offline earnings calculation
+        if (data.lastSaveTime) {
+            const elapsed = Date.now() - data.lastSaveTime;
+            const hours = elapsed / (1000 * 60 * 60);
+            if (hours >= 0.1) { // At least 6 minutes away
+                const offlineEarnings = this.calculateOfflineEarnings(hours);
+                if (offlineEarnings.totalGold > 0 || offlineEarnings.bankInterest > 0) {
+                    const totalOffline = offlineEarnings.totalGold + offlineEarnings.bankInterest;
+                    this.addGold(totalOffline);
+                    const timeText = hours >= 1 ? `${Math.floor(hours)}h ${Math.round((hours % 1) * 60)}m` : `${Math.round(hours * 60)}m`;
+                    setTimeout(() => {
+                        this.showDialog(
+                            `Welcome back! You were away for ${timeText}.\n\n` +
+                            `💰 Shop earnings: ${offlineEarnings.totalGold}g\n` +
+                            `🏦 Bank interest: ${offlineEarnings.bankInterest}g\n` +
+                            `\nTotal: +${totalOffline}g`, null);
+                    }, 300);
+                }
+            }
+        }
+
         return true;
+    }
+
+    calculateOfflineEarnings(hours) {
+        // Passive income while away (capped at 24 hours)
+        const cappedHours = Math.min(hours, 24);
+
+        // Shop earnings: based on reputation and shop level
+        const shopRate = (this.reputation.reputation * 0.5 + this.shop.shopLevel * 10) * cappedHours;
+        const shopGold = Math.round(shopRate);
+
+        // Bank interest: compound for each hour
+        let bankInterest = 0;
+        if (this.bank.deposits > 0) {
+            const hourlyRate = this.bank.interestRate / 24;
+            bankInterest = Math.round(this.bank.deposits * hourlyRate * cappedHours);
+            this.bank.accumulatedInterest += bankInterest;
+        }
+
+        return { totalGold: shopGold, bankInterest };
     }
 
     newGame() {

@@ -97,6 +97,42 @@ class CombatUI {
             r.resetAlpha();
         });
 
+        // Auto-combat toggle
+        if (!CombatUI._autoCombat) CombatUI._autoCombat = false;
+        const autoHover = inp.isOver(960, 520, 80, 22);
+        r.roundRect(960, 520, 80, 22, 3,
+            CombatUI._autoCombat ? '#2a5a2a' : (autoHover ? 'rgba(40,60,40,0.5)' : 'rgba(20,30,20,0.3)'),
+            CombatUI._autoCombat ? '#44aa44' : '#444');
+        r.text(`🤖 Auto: ${CombatUI._autoCombat ? 'ON' : 'OFF'}`, 968, 524, CombatUI._autoCombat ? '#88ff88' : '#888', 9);
+        if (inp.clickedIn(960, 520, 80, 22)) {
+            CombatUI._autoCombat = !CombatUI._autoCombat;
+            game.audio.click();
+        }
+
+        // Auto-combat logic
+        if (CombatUI._autoCombat && combat.state === 'playerTurn' && !combat.animating) {
+            // Auto-attack (or use potion if low HP)
+            if (combat.player.currentHp < combat.player.maxHp * 0.3 && game.inventory.hasItem('health_potion', 1)) {
+                const potion = game.inventory.items['health_potion'];
+                if (potion && combat.playerUsePotion(potion)) {
+                    game.inventory.removeItem('health_potion', 1);
+                    game.audio.heal();
+                }
+            } else {
+                const result = combat.playerAttack();
+                if (result) {
+                    game.audio[result.isCrit ? 'crit' : 'hit']();
+                    game.particles.damage(ex, ey + 30, result.damage, result.isCrit);
+                    r.shake(result.isCrit ? 300 : 150);
+                    if (result.isCrit) r.flash('#ff4444', 150);
+                    if (result.type === 'victory') {
+                        game.audio.victory();
+                        r.flash('#ffd700', 300);
+                    }
+                }
+            }
+        }
+
         // === ACTIONS ===
         if (combat.state === 'playerTurn') {
             r.panel(550, 520, 400, 210, '⚡ Actions');
