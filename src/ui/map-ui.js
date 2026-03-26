@@ -218,8 +218,11 @@ class MapUI {
         const bank = game.bank;
 
         r.text(`Deposits: ${Utils.formatGold(bank.deposits)}g / ${Utils.formatGold(bank.maxDeposit)}g`, 810, 650, '#44ddff', 11);
-        r.text(`Interest Rate: ${Math.round(bank.interestRate * 100)}% daily`, 810, 668, '#aaa', 10);
-        r.text(`Earned: ${Utils.formatGold(bank.totalInterestEarned)}g total`, 810, 683, '#ffd700', 10);
+        r.text(`Interest: ${Math.round(bank.interestRate * 100)}% daily`, 810, 666, '#aaa', 10);
+        // Daily interest prediction
+        const dailyInterest = Math.round(bank.deposits * bank.interestRate);
+        if (dailyInterest > 0) r.text(`(+${dailyInterest}g/day)`, 950, 666, '#44ff44', 9);
+        r.text(`Earned: ${Utils.formatGold(bank.totalInterestEarned)}g total`, 810, 680, '#ffd700', 10);
 
         if (bank.accumulatedInterest > 0) {
             const collectHover = inp.isOver(1030, 648, 140, 22);

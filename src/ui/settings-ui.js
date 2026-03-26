@@ -117,9 +117,12 @@ class SettingsUI {
             game.audio.click();
         }
 
+        // Save size
+        r.text(`Size: ${game.saveSystem.getSaveSize()}`, px + 170, sy + 8, '#666', 9);
+
         // Delete save
-        const delHover = inp.isOver(px + 190, sy, 140, 30);
-        r.button(px + 190, sy, 140, 30, '🗑 Delete Save', delHover, false, '#5a2020');
+        const delHover = inp.isOver(px + 260, sy, 120, 30);
+        r.button(px + 260, sy, 120, 30, '🗑 Delete', delHover, false, '#5a2020');
         if (inp.clickedIn(px + 190, sy, 140, 30)) {
             game.showDialog('Delete your save? This cannot be undone!', [
                 { label: 'Delete', action: () => {
