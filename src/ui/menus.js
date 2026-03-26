@@ -166,6 +166,18 @@ class ExploreUI {
         r.panel(10, 55, 1180, 50, null);
         r.text(`${area.icon} ${area.name} - Floor ${exploration.currentFloor}/${area.floors}`, 20, 70, '#fff', 16);
         r.progressBar(400, 72, 200, 12, exploration.currentFloor, area.floors, area.color, '#222');
+
+        // Mini floor map
+        const mapX = 620, mapW = 550;
+        for (let f = 1; f <= area.floors; f++) {
+            const fx = mapX + ((f - 1) / (area.floors - 1)) * mapW;
+            const isCurrent = f === exploration.currentFloor;
+            const isBoss = f === area.bossFloor;
+            const isCleared = f < exploration.currentFloor;
+            r.circle(fx, 76, isCurrent ? 5 : 3,
+                isCurrent ? '#fff' : isCleared ? area.color : '#333',
+                isBoss ? '#ffd700' : null, isBoss ? 1 : 0);
+        }
         r.text(`⚡ ${exploration.stamina}`, 620, 70, '#44ddff', 13);
 
         // Exploration log

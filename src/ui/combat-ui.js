@@ -96,9 +96,20 @@ class CombatUI {
             r.text('▶ ENEMY TURN', ex, ey - 35, '#ff4444', 10, 'center');
         }
 
-        // Enemy ATK/DEF
+        // Enemy stats and loot preview
         r.text(`ATK: ${combat.enemy.atk}`, ex - 55, ey + 135, '#ff8844', 9);
         r.text(`DEF: ${combat.enemy.def}`, ex + 5, ey + 135, '#4488ff', 9);
+
+        // Loot preview (show potential drops)
+        if (combat.enemy.drops && combat.enemy.drops.length > 0) {
+            const dropIcons = combat.enemy.drops.slice(0, 4).map(d => {
+                const item = ItemDB[d.item];
+                return item ? `${item.icon}${Math.round(d.chance*100)}%` : '';
+            }).filter(Boolean).join(' ');
+            r.text(dropIcons, ex, ey + 155, '#aaa', 8, 'center');
+        }
+        // Gold/XP preview
+        r.text(`💰${combat.enemy.gold[0]}-${combat.enemy.gold[1]} ⭐${combat.enemy.xp}`, ex, ey + 168, '#888', 8, 'center');
 
         // === COMBAT LOG ===
         r.panel(30, 520, 500, 200, '📋 Battle Log');
@@ -273,6 +284,17 @@ class CombatUI {
             if (inp.clickedIn(500, 390, 200, 45)) {
                 game.collectCombatRewards();
                 game.audio.coin();
+            }
+
+            // Heal button for Endless Dungeon between floors
+            if (game.endless.active && game.inventory.hasItem('health_potion', 1)) {
+                const healHover = inp.isOver(500, 440, 200, 30);
+                r.button(500, 440, 200, 30, `🧪 Heal (${game.inventory.getCount('health_potion')} left)`, healHover, false, '#2a5a2a');
+                if (inp.clickedIn(500, 440, 200, 30)) {
+                    game.inventory.removeItem('health_potion', 1);
+                    game.audio.heal();
+                    game.notify('Healed between floors!', '#44ff44');
+                }
             }
         }
 
