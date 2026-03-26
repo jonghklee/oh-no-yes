@@ -133,12 +133,13 @@ class HUD {
         const lrDay = game.loginRewards.getDayInCycle();
         r.text(`📅${lrDay}/7`, 960, 14, lrDay === 7 ? '#ffd700' : '#888', 10);
 
-        // Daily challenge mini-display
+        // Daily challenge mini-display with progress bar
         const dc = game.daily.currentChallenge;
         if (dc && !game.daily.completedToday) {
             r.roundRect(1000, 2, 40, 40, 4, 'rgba(30,60,80,0.8)', '#44ddff');
-            r.text('📋', 1010, 8, '#fff', 16);
-            r.text(`${dc.progress}/${dc.target}`, 1020, 26, '#44ddff', 8, 'center');
+            r.text(dc.icon || '📋', 1010, 6, '#fff', 14);
+            r.text(`${dc.progress}/${dc.target}`, 1020, 23, '#44ddff', 7, 'center');
+            r.progressBar(1003, 34, 34, 4, dc.progress, dc.target, '#44ddff', '#222');
         } else if (dc && game.daily.completedToday) {
             r.roundRect(1000, 2, 40, 40, 4, 'rgba(30,80,30,0.8)', '#44ff44');
             r.text('✅', 1010, 10, '#fff', 16);
