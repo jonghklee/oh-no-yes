@@ -803,7 +803,16 @@ class Game {
             this.screen = this.previousScreen;
         }
 
-        this.notify(`+${gold}g, +${rewards.xp} XP!`, '#ffd700');
+        // Reward summary with drop names
+        let rewardMsg = `+${gold}g, +${rewards.xp} XP`;
+        if (rewards.drops.length > 0) {
+            const dropNames = rewards.drops.slice(0, 3).map(d => {
+                const item = ItemDB[d.item];
+                return item ? `${item.icon}${d.qty}` : '';
+            }).filter(Boolean).join(' ');
+            rewardMsg += ` | ${dropNames}`;
+        }
+        this.notify(rewardMsg, '#ffd700');
     }
 
     switchScreen(screen) {
