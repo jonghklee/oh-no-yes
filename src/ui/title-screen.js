@@ -97,7 +97,7 @@ class TitleScreen {
         }
 
         // Version & credits
-        r.text('v4.0 - Made with ❤', 600, 680, '#444', 11, 'center');
+        r.text('v4.1 - Made with ❤', 600, 680, '#444', 11, 'center');
 
         // Gameplay tips (rotate every 4 seconds)
         const tips = [
