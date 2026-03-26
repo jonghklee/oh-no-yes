@@ -321,7 +321,29 @@ class Game {
 
         // Quest updates
         this.quests.autoAcceptMainQuests();
-        this.reputation.addReputation(1); // small daily reputation
+        this.reputation.addReputation(1);
+
+        // Secret events on special days
+        if (this.day === 100) {
+            this.notify('🌟 Day 100! A mysterious merchant appears...', '#ff44ff', 5000);
+            this.inventory.addItem('diamond', 3);
+            this.addGold(5000);
+            this.notify('🎁 Gift: 3x Diamond + 5000g!', '#ffd700');
+        }
+        if (this.day === 365) {
+            this.notify('🎂 One year anniversary! The gods bestow a gift!', '#ffd700', 5000);
+            this.inventory.addItem('phoenix_feather', 2);
+            this.inventory.addItem('void_essence', 5);
+            this.skills.addPoints(5);
+            this.notify('🎁 Gift: 2x Phoenix Feather + 5x Void Essence + 5 SP!', '#ffd700');
+        }
+        if (this.day % 77 === 0 && this.day > 0) {
+            // Lucky day every 77 days
+            const luckyGold = Math.round(this.gold * 0.1);
+            this.addGold(luckyGold);
+            this.notify(`🍀 Lucky Day ${this.day}! +${luckyGold}g (10% of current gold)!`, '#44ff44');
+            this.particles.burst(600, 400, 15, '#44ff44', 3);
+        }
 
         // Auto-save
         this.saveGame();
@@ -639,8 +661,13 @@ class Game {
             this.reputation.addReputation(10);
             this.audio.victory();
 
-            // Check for final boss defeat → ending scene
+            // Check for final boss defeat → ending scene + secrets
             if (this.combat.enemy?.id === 'void_lord' || this.combat.enemy?.finalBoss) {
+                // Unlock secret recipes
+                const secrets = this.crafting.unlockSecretRecipes();
+                if (secrets.length > 0) {
+                    this.notify('🔓 Secret recipes unlocked! Check Craft tab!', '#ff44ff', 6000);
+                }
                 this.triggerEnding();
             }
         }

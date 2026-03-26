@@ -159,10 +159,23 @@ class CraftingSystem {
 
     checkNewRecipes() {
         for (const [id, recipe] of Object.entries(RecipeDB)) {
+            if (recipe.secret) continue; // Secret recipes need special discovery
             if (!this.discoveredRecipes.has(id) && this.level >= recipe.level && this.unlockedStations[recipe.station]) {
                 this.discoveredRecipes.add(id);
             }
         }
+    }
+
+    // Unlock secret recipes (called after specific achievements)
+    unlockSecretRecipes() {
+        const secrets = [];
+        for (const [id, recipe] of Object.entries(RecipeDB)) {
+            if (recipe.secret && !this.discoveredRecipes.has(id)) {
+                this.discoveredRecipes.add(id);
+                secrets.push(id);
+            }
+        }
+        return secrets;
     }
 
     // Discover recipes based on materials in inventory

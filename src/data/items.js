@@ -426,6 +426,26 @@ const ItemDB = {
         description: 'The ultimate symbol of merchant mastery.',
         stats: { sellBonus: 0.25, buyDiscount: 0.15 }, quest: true
     },
+
+    // === SECRET ITEMS ===
+    infinity_blade: {
+        id: 'infinity_blade', name: 'Infinity Blade', category: ItemCategory.WEAPON,
+        rarity: ItemRarity.LEGENDARY, basePrice: 5000, icon: '🌟',
+        description: 'A blade forged from the essence of all elements. Secret weapon.',
+        stats: { atk: 75, critRate: 0.2, lifesteal: 0.15, speed: 5 }, crafted: true, secret: true
+    },
+    merchant_crown: {
+        id: 'merchant_crown', name: "Merchant's Crown", category: ItemCategory.ACCESSORY,
+        rarity: ItemRarity.LEGENDARY, basePrice: 8000, icon: '👑',
+        description: 'The legendary crown of the first merchant. +30% sell, +20% buy discount.',
+        stats: { sellBonus: 0.30, buyDiscount: 0.20, luck: 10 }, crafted: true, secret: true
+    },
+    void_armor: {
+        id: 'void_armor', name: 'Void Armor', category: ItemCategory.ARMOR,
+        rarity: ItemRarity.LEGENDARY, basePrice: 6000, icon: '🌑',
+        description: 'Armor woven from void itself. Nearly indestructible.',
+        stats: { def: 60, mdef: 30, dodge: 0.12, hp: 100 }, crafted: true, secret: true
+    },
 };
 
 // Get item with quality variation

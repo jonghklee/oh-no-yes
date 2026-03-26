@@ -244,6 +244,41 @@ const RecipeDB = {
         station: 'alchemy', level: 10, xp: 80, time: 15,
         category: 'seasonal', season: 'winter'
     },
+    // === SECRET RECIPES (discovered through special conditions) ===
+    infinity_blade: {
+        id: 'infinity_blade', result: 'infinity_blade', resultQty: 1,
+        ingredients: [
+            { item: 'void_essence', qty: 15 },
+            { item: 'phoenix_feather', qty: 3 },
+            { item: 'diamond', qty: 5 },
+            { item: 'dragon_scale', qty: 10 }
+        ],
+        station: 'forge', level: 25, xp: 500, time: 120,
+        category: 'secret', secret: true
+    },
+    merchant_crown: {
+        id: 'merchant_crown', result: 'merchant_crown', resultQty: 1,
+        ingredients: [
+            { item: 'gold_ore', qty: 20 },
+            { item: 'diamond', qty: 3 },
+            { item: 'ruby', qty: 3 },
+            { item: 'emerald', qty: 3 },
+            { item: 'sapphire', qty: 3 }
+        ],
+        station: 'enchanting', level: 20, xp: 400, time: 90,
+        category: 'secret', secret: true
+    },
+    void_armor: {
+        id: 'void_armor', result: 'void_armor', resultQty: 1,
+        ingredients: [
+            { item: 'void_essence', qty: 20 },
+            { item: 'mithril_ore', qty: 10 },
+            { item: 'dragon_scale', qty: 8 },
+            { item: 'phoenix_feather', qty: 2 }
+        ],
+        station: 'forge', level: 25, xp: 500, time: 120,
+        category: 'secret', secret: true
+    },
 };
 
 const CraftingStations = {
