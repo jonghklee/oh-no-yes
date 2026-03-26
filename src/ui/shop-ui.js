@@ -145,7 +145,13 @@ class ShopUI {
 
         if (shop.customers.length === 0 && !shop.activeNegotiation) {
             r.text('Waiting for customers...', 600, 170, '#666', 16, 'center');
-            r.text(`Next customer in ~${Math.ceil((shop.customerInterval - shop.customerTimer) / 1000)}s`, 600, 200, '#555', 12, 'center');
+            const waitSec = Math.ceil((shop.customerInterval - shop.customerTimer) / 1000);
+            r.text(`Next customer in ~${waitSec}s`, 600, 195, '#555', 12, 'center');
+            r.progressBar(500, 215, 200, 8, shop.customerTimer, shop.customerInterval, '#5a3090', '#222');
+        } else if (shop.customers.length < shop.maxCustomers) {
+            // Next customer timer bar (small, at top of customer panel)
+            const nextPct = shop.customerTimer / shop.customerInterval;
+            r.progressBar(400, 80, 790, 3, nextPct, 1, '#3d1e6d', '#222');
         }
 
         // Render customers
