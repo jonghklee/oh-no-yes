@@ -210,7 +210,21 @@ class CraftingUI {
                     const has = game.inventory.getCount(ing.item);
                     const enough = has >= ing.qty;
                     r.text(`${item?.icon || '?'} ${item?.name || ing.item}`, 745, 252 + i * 22, enough ? '#fff' : '#ff6666', 12);
-                    r.text(`${has}/${ing.qty}`, 1050, 252 + i * 22, enough ? '#88ff88' : '#ff6666', 12, 'right');
+                    r.text(`${has}/${ing.qty}`, 1020, 252 + i * 22, enough ? '#88ff88' : '#ff6666', 12, 'right');
+                    // Buy shortcut for missing materials
+                    if (!enough && item) {
+                        const need = ing.qty - has;
+                        const buyCost = game.economy.getBuyPrice(ing.item, 1.0, bonuses) * need;
+                        const buyable = game.gold >= buyCost;
+                        const bHover = inp.isOver(1060, 250 + i * 22, 110, 18);
+                        r.button(1060, 250 + i * 22, 110, 18, `Buy ${need} (${buyCost}g)`, bHover, !buyable, '#2a3a2a');
+                        if (buyable && inp.clickedIn(1060, 250 + i * 22, 110, 18)) {
+                            game.spendGold(buyCost);
+                            game.inventory.addItem(ing.item, need);
+                            game.audio.buy();
+                            game.notify(`Bought ${need}x ${item.name}!`, '#44ff44');
+                        }
+                    }
                 });
 
                 // Craft time
