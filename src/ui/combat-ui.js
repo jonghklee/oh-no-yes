@@ -64,6 +64,30 @@ class CombatUI {
         r.text(`ATK: ${combat.player.atk}`, px - 55, py + 135, '#ff8844', 10);
         r.text(`DEF: ${combat.player.def}`, px + 5, py + 135, '#4488ff', 10);
 
+        // Status effect indicators on player
+        if (combat.player.defending) {
+            r.text('🛡', px + 50, py, '#4488ff', 16);
+        }
+
+        // Turn indicator glow
+        if (combat.state === 'playerTurn') {
+            const glowAlpha = Math.sin(Date.now() / 300) * 0.3 + 0.5;
+            r.setAlpha(glowAlpha);
+            r.strokeRect(px - 65, py - 15, 130, 140, '#44ff44', 2);
+            r.resetAlpha();
+            r.text('▶ YOUR TURN', px, py - 20, '#44ff44', 10, 'center');
+        } else if (combat.state === 'enemyTurn') {
+            const glowAlpha = Math.sin(Date.now() / 200) * 0.3 + 0.5;
+            r.setAlpha(glowAlpha);
+            r.strokeRect(ex - 65, ey - 15, 130, 140, '#ff4444', 2);
+            r.resetAlpha();
+            r.text('▶ ENEMY TURN', ex, ey - 35, '#ff4444', 10, 'center');
+        }
+
+        // Enemy ATK/DEF
+        r.text(`ATK: ${combat.enemy.atk}`, ex - 55, ey + 135, '#ff8844', 9);
+        r.text(`DEF: ${combat.enemy.def}`, ex + 5, ey + 135, '#4488ff', 9);
+
         // === COMBAT LOG ===
         r.panel(30, 520, 500, 200, '📋 Battle Log');
         combat.log.forEach((msg, i) => {

@@ -11,12 +11,21 @@ class CraftingSystem {
         this.discoveredRecipes = new Set(['wooden_sword', 'leather_armor', 'copper_ring', 'bread', 'health_potion', 'iron_ingot', 'herb_pouch']);
     }
 
-    canCraft(recipeId, inventory) {
+    canCraft(recipeId, inventory, currentDay) {
         const recipe = RecipeDB[recipeId];
         if (!recipe) return { can: false, reason: 'Recipe not found' };
         if (!this.unlockedStations[recipe.station]) return { can: false, reason: `Need ${CraftingStations[recipe.station].name}` };
         if (this.level < recipe.level) return { can: false, reason: `Need crafting level ${recipe.level}` };
         if (!this.discoveredRecipes.has(recipeId)) return { can: false, reason: 'Recipe not discovered' };
+        // Seasonal check
+        if (recipe.season && currentDay) {
+            const season = getSeason(currentDay);
+            const seasonNames = { '🌸': 'spring', '☀': 'summer', '🍂': 'autumn', '❄': 'winter' };
+            const currentSeasonName = Object.entries(Seasons).find(([k, v]) => v.name === season.name)?.[0];
+            if (currentSeasonName !== recipe.season) {
+                return { can: false, reason: `Only in ${recipe.season}` };
+            }
+        }
 
         for (const ing of recipe.ingredients) {
             if (!inventory.hasItem(ing.item, ing.qty)) {

@@ -161,6 +161,43 @@ class ShopUI {
                     game.notify(result.dialogue, '#ff8888');
                 }
             }
+
+            // Counter-offer buttons (preset price options)
+            r.text('Counter:', 420, 598, '#888', 10);
+            const counterPrices = [
+                Math.round(neg.currentOffer * 1.1),
+                Math.round(neg.currentOffer * 1.25),
+                Math.round(neg.currentOffer * 1.5)
+            ];
+            counterPrices.forEach((cp, i) => {
+                const cpx = 480 + i * 100;
+                const cpHover = inp.isOver(cpx, 595, 90, 22);
+                r.button(cpx, 595, 90, 22, `💬 ${cp}g`, cpHover, false, '#3a3a5a');
+                if (inp.clickedIn(cpx, 595, 90, 22)) {
+                    const result = shop.counterOffer(cp);
+                    if (result) {
+                        if (result.type === 'accepted') {
+                            // Auto-accept the deal
+                            const saleResult = shop.acceptOffer();
+                            if (saleResult) {
+                                game.addGold(saleResult.price);
+                                game.audio.sell();
+                                game.particles.saleEffect(600, 480);
+                                game.particles.goldGain(600, 500, saleResult.price);
+                                game.reputation.addReputation(2);
+                                game.notify(`Deal! Sold for ${saleResult.price}g!`, '#44ff44');
+                                game.renderer.shake(100);
+                            }
+                        } else if (result.type === 'customerAngry') {
+                            game.notify(result.dialogue, '#ff4444');
+                            game.reputation.loseReputation(2);
+                        } else {
+                            game.notify(result.dialogue, '#ffaa44');
+                        }
+                        game.audio.click();
+                    }
+                }
+            });
         }
 
         // === BOTTOM LEFT: Daily Summary ===

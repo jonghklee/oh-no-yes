@@ -219,6 +219,31 @@ const RecipeDB = {
         station: 'workbench', level: 2, xp: 10, time: 3,
         category: 'tools'
     },
+    // === SEASONAL RECIPES ===
+    spring_tonic: {
+        id: 'spring_tonic', result: 'health_potion', resultQty: 3,
+        ingredients: [{ item: 'herb', qty: 5 }, { item: 'moonflower', qty: 1 }],
+        station: 'alchemy', level: 3, xp: 20, time: 5,
+        category: 'seasonal', season: 'spring'
+    },
+    summer_feast: {
+        id: 'summer_feast', result: 'feast', resultQty: 2,
+        ingredients: [{ item: 'herb', qty: 8 }, { item: 'leather', qty: 2 }],
+        station: 'kitchen', level: 8, xp: 40, time: 10,
+        category: 'seasonal', season: 'summer'
+    },
+    autumn_pickaxe: {
+        id: 'autumn_pickaxe', result: 'golden_pickaxe', resultQty: 1,
+        ingredients: [{ item: 'gold_ore', qty: 3 }, { item: 'wood', qty: 5 }],
+        station: 'forge', level: 8, xp: 50, time: 12,
+        category: 'seasonal', season: 'autumn'
+    },
+    winter_elixir: {
+        id: 'winter_elixir', result: 'elixir_of_life', resultQty: 1,
+        ingredients: [{ item: 'moonflower', qty: 3 }, { item: 'crystal', qty: 2 }],
+        station: 'alchemy', level: 10, xp: 80, time: 15,
+        category: 'seasonal', season: 'winter'
+    },
 };
 
 const CraftingStations = {

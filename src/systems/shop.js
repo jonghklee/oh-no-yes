@@ -179,7 +179,6 @@ class ShopSystem {
         // Customer patience decreases
         neg.customer.currentPatience--;
         if (neg.customer.currentPatience <= 0) {
-            // Customer leaves
             const custIdx = this.customers.findIndex(c => c.id === neg.customerId);
             if (custIdx !== -1) this.customers.splice(custIdx, 1);
             const result = {
@@ -195,6 +194,53 @@ class ShopSystem {
             newOffer: neg.currentOffer,
             dialogue: Utils.choice(neg.customer.dialogue.haggle)
         };
+    }
+
+    counterOffer(price) {
+        if (!this.activeNegotiation) return null;
+        const neg = this.activeNegotiation;
+
+        // How far is the counter-offer from what customer is willing to pay?
+        const maxWilling = Math.round(neg.askPrice * (1.2 + neg.customer.haggleSkill * 0.3));
+        const ratio = price / maxWilling;
+
+        if (price <= neg.currentOffer) {
+            // Player asking less than current offer - auto accept
+            neg.currentOffer = price;
+            return { type: 'accepted', dialogue: Utils.choice(neg.customer.dialogue.happy) };
+        }
+
+        if (ratio > 1.5) {
+            // Way too high - customer leaves
+            neg.customer.currentPatience = 0;
+            const custIdx = this.customers.findIndex(c => c.id === neg.customerId);
+            if (custIdx !== -1) this.customers.splice(custIdx, 1);
+            this.activeNegotiation = null;
+            return { type: 'customerAngry', dialogue: "That's outrageous! I'm leaving!" };
+        }
+
+        if (ratio > 1.2) {
+            // Too high - customer refuses but stays
+            neg.customer.currentPatience--;
+            if (neg.customer.currentPatience <= 0) {
+                const custIdx = this.customers.findIndex(c => c.id === neg.customerId);
+                if (custIdx !== -1) this.customers.splice(custIdx, 1);
+                this.activeNegotiation = null;
+                return { type: 'customerAngry', dialogue: Utils.choice(neg.customer.dialogue.leave) };
+            }
+            return { type: 'tooHigh', dialogue: "That's too much. Try lower.", newOffer: neg.currentOffer };
+        }
+
+        // Reasonable counter - meet in the middle
+        const meetPrice = Math.round((price + neg.currentOffer) / 2);
+        neg.currentOffer = Math.min(price, Math.max(meetPrice, neg.currentOffer));
+        neg.haggleCount++;
+
+        if (neg.currentOffer >= price * 0.9) {
+            return { type: 'accepted', dialogue: "Fine, you drive a hard bargain!", newOffer: neg.currentOffer };
+        }
+
+        return { type: 'counter', dialogue: `How about ${neg.currentOffer}g?`, newOffer: neg.currentOffer };
     }
 
     rejectOffer() {
