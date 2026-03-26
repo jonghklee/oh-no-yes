@@ -85,6 +85,13 @@ class InventoryUI {
             r.text(`🔗 ${setBonus.name}`, 25, 610, '#ff88ff', 10);
         }
 
+        // Total net worth
+        let inventoryValue = 0;
+        for (const item of inv.getItemList()) {
+            inventoryValue += (item.basePrice || 0) * (item.quantity || 1);
+        }
+        r.text(`💎 Net Worth: ${Utils.formatGold(game.gold + inventoryValue + game.bank.deposits)}g`, 25, 625, '#ffd700', 9);
+
         // === Main Inventory ===
         r.panel(270, 55, 550, 700, `🎒 Inventory (${inv.getUsedSlots()}/${inv.maxSlots})`);
 
