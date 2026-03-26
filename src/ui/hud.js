@@ -123,10 +123,43 @@ class HUD {
             r.text(`${tab.icon} ${tab.label}`, tx + tabWidth / 2, y + 12, textColor, 13, 'center');
             r.text(tab.key, tx + tabWidth - 12, y + 26, '#555', 9, 'right');
 
-            if (inp.clickedIn(tx, y + 2, tabWidth - 4, 40) || inp.justPressed(tab.key)) {
+            // Notification badge
+            const badge = HUD.getTabBadge(game, tab.id);
+            if (badge > 0 && !isActive) {
+                r.circle(tx + tabWidth - 12, y + 10, 8, '#ff4444');
+                r.text(badge > 9 ? '!' : badge.toString(), tx + tabWidth - 12, y + 5, '#fff', 9, 'center');
+            }
+
+            if (inp.clickedIn(tx, y + 2, tabWidth - 4, 40)) {
                 game.switchScreen(tab.id);
             }
         });
+    }
+
+    static getTabBadge(game, tabId) {
+        switch (tabId) {
+            case 'quest': {
+                // Count claimable quest rewards
+                return game.quests.getActiveQuestList().filter(q => q.state.completed).length;
+            }
+            case 'skills': {
+                return game.skills.skillPoints > 0 ? game.skills.skillPoints : 0;
+            }
+            case 'craft': {
+                // Has completed craft
+                return game.crafting.currentCraft === null && game.crafting.craftQueue.length > 0 ? 1 : 0;
+            }
+            case 'map': {
+                // Bank interest to collect
+                return game.bank.accumulatedInterest > 0 ? 1 : 0;
+            }
+            case 'explore': {
+                // Weekly boss available
+                return game.weeklyBoss ? 1 : 0;
+            }
+            default:
+                return 0;
+        }
     }
 
     static renderNotifications(game) {
