@@ -638,6 +638,11 @@ class Game {
         if (rewards.isBoss) {
             this.reputation.addReputation(10);
             this.audio.victory();
+
+            // Check for final boss defeat → ending scene
+            if (this.combat.enemy?.id === 'void_lord' || this.combat.enemy?.finalBoss) {
+                this.triggerEnding();
+            }
         }
         this.trackDaily('defeat', 1);
         this.challengeMode.addScore('kills', 1);
@@ -683,6 +688,47 @@ class Game {
         this.scrollOffset = 0;
         this.selectedItem = null;
         this.audio.click();
+    }
+
+    triggerEnding() {
+        const stats = this.getStats();
+        const ptMin = Math.floor(this.playtimeMs / 60000);
+        const ptH = Math.floor(ptMin / 60);
+        const ptM = ptMin % 60;
+
+        setTimeout(() => {
+            this.showDialog(
+                '🎉 CONGRATULATIONS! 🎉\n\n' +
+                'You defeated the Void Lord and saved reality!\n' +
+                'The merchant world is at peace... for now.\n\n' +
+                `📊 Your Journey:\n` +
+                `⏱ Playtime: ${ptH}h ${ptM}m | 📅 Days: ${stats.playDays}\n` +
+                `💰 Gold Earned: ${Utils.formatGold(stats.totalGold)} | 📈 Sales: ${stats.totalSales}\n` +
+                `🔨 Crafts: ${stats.totalCrafts} | ⚔ Bosses: ${stats.bossesDefeated}\n` +
+                `🏰 Endless Best: F${this.endless.highestFloor}\n\n` +
+                `⭐ New Game+ is now available!\n` +
+                `Continue playing or Prestige for permanent bonuses.`,
+                [
+                    { label: '⭐ New Game+', action: () => {
+                        this.startPrestige();
+                        this.dismissDialog();
+                    }},
+                    { label: 'Keep Playing', action: () => this.dismissDialog() }
+                ]
+            );
+        }, 2000);
+
+        // Epic celebration
+        this.renderer.flash('#ffd700', 500);
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                this.particles.burst(
+                    200 + Math.random() * 800,
+                    200 + Math.random() * 400,
+                    15, Utils.choice(['#ffd700', '#ff44ff', '#44ffff', '#44ff44', '#ff4444']), 4
+                );
+            }, i * 300);
+        }
     }
 
     checkSynergyBonus() {
