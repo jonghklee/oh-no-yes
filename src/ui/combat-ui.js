@@ -40,9 +40,11 @@ class CombatUI {
         r.text(combat.enemy.icon, ex, ey + 20, '#fff', 50, 'center');
         r.textBold(combat.enemy.name, ex, ey + 90, '#fff', 14, 'center');
 
-        // Enemy HP bar
-        r.progressBar(ex - 60, ey + 110, 120, 16, combat.enemy.currentHp, combat.enemy.maxHp, '#ff4444', '#333');
-        r.text(`${combat.enemy.currentHp}/${combat.enemy.maxHp}`, ex, ey + 112, '#fff', 9, 'center');
+        // Enemy HP bar with percentage
+        const enemyHpPct = Math.round(combat.enemy.currentHp / combat.enemy.maxHp * 100);
+        const hpColor = enemyHpPct > 50 ? '#ff4444' : enemyHpPct > 25 ? '#ff8844' : '#ff2222';
+        r.progressBar(ex - 60, ey + 110, 120, 16, combat.enemy.currentHp, combat.enemy.maxHp, hpColor, '#333');
+        r.text(`${combat.enemy.currentHp}/${combat.enemy.maxHp} (${enemyHpPct}%)`, ex, ey + 112, '#fff', 8, 'center');
 
         if (combat.enemy.boss) {
             r.text('👑 BOSS', ex, ey - 25, '#ffd700', 12, 'center');
@@ -86,8 +88,10 @@ class CombatUI {
         r.text('⚔', px, py + 20, '#fff', 50, 'center');
         r.textBold('You', px, py + 90, '#fff', 14, 'center');
 
-        // Player HP bar
-        r.progressBar(px - 60, py + 110, 120, 16, combat.player.currentHp, combat.player.maxHp, '#44aa44', '#333');
+        // Player HP bar with color scaling
+        const playerHpPct = Math.round(combat.player.currentHp / combat.player.maxHp * 100);
+        const playerHpColor = playerHpPct > 50 ? '#44aa44' : playerHpPct > 25 ? '#aaaa44' : '#aa4444';
+        r.progressBar(px - 60, py + 110, 120, 16, combat.player.currentHp, combat.player.maxHp, playerHpColor, '#333');
         r.text(`${combat.player.currentHp}/${combat.player.maxHp}`, px, py + 112, '#fff', 9, 'center');
 
         // Player stats
