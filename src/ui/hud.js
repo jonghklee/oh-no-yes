@@ -97,10 +97,17 @@ class HUD {
             game.audio.click();
         }
 
+        // Save indicator
+        if (game._saveIndicator > 0) {
+            r.setAlpha(game._saveIndicator / 40);
+            r.text('💾', 1120, 14, '#44ff44', 11);
+            r.resetAlpha();
+        }
+
         // Settings button
-        const settingsHover = inp.isOver(1135, 8, 30, 28);
-        r.text('⚙', 1140, 12, settingsHover ? '#fff' : '#666', 14);
-        if (inp.clickedIn(1135, 8, 30, 28)) {
+        const settingsHover = inp.isOver(1150, 8, 30, 28);
+        r.text('⚙', 1155, 12, settingsHover ? '#fff' : '#666', 14);
+        if (inp.clickedIn(1150, 8, 30, 28)) {
             SettingsUI.toggle();
             game.audio.click();
         }

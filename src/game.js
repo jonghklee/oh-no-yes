@@ -596,10 +596,12 @@ class Game {
             }
         }
 
-        // Auto-save check
+        // Auto-save check with visual indicator
         if (this.saveSystem.shouldAutoSave(Date.now())) {
             this.saveGame();
+            this._saveIndicator = 40; // Show save icon for ~0.7s
         }
+        if (this._saveIndicator > 0) this._saveIndicator--;
 
         // Check completed quests
         const completed = this.quests.updateProgress('totalGold', { count: 0 }); // re-check
