@@ -61,8 +61,11 @@ class MapUI {
                 const hovered = inp.isOver(190, iy, 580, 22);
                 const isSelected = MapUI.selectedItem === id;
 
+                const hasStock = game.inventory.getCount(id) > 0;
                 if (hovered || isSelected) {
                     r.fillRect(190, iy, 580, 22, isSelected ? 'rgba(80,40,120,0.4)' : 'rgba(61,30,109,0.2)');
+                } else if (hasStock) {
+                    r.fillRect(190, iy, 580, 22, 'rgba(30,50,30,0.2)');
                 }
 
                 r.text(`${item.icon} ${item.name}`, 200, iy + 3, RarityColors[item.rarity], 11);
